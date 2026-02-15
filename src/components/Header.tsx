@@ -1,18 +1,20 @@
 import { motion } from 'motion/react'
 import { HiOfficeBuilding, HiPencil } from 'react-icons/hi'
 import { employees } from '../data'
-import type { Desk, SeatingMap, UnavailableDeskMap } from '../types'
+import type { Desk, Zone, SeatingMap, DeskNameMap, UnavailableDeskMap } from '../types'
 import { SharePanel } from './SharePanel'
 
 interface HeaderProps {
   seating: SeatingMap
   desks: Desk[]
+  zones: Zone[]
+  deskNames: DeskNameMap
   unavailableDesks: UnavailableDeskMap
   onImport: (seating: SeatingMap) => void
   onEditLayout: () => void
 }
 
-export function Header({ seating, desks, unavailableDesks, onImport, onEditLayout }: HeaderProps) {
+export function Header({ seating, desks, zones, deskNames, unavailableDesks, onImport, onEditLayout }: HeaderProps) {
   const assigned = Object.values(seating).filter(Boolean).length
   const totalDesks = desks.length
   const unavailableCount = Object.keys(unavailableDesks).length
@@ -65,7 +67,7 @@ export function Header({ seating, desks, unavailableDesks, onImport, onEditLayou
           <HiPencil className="text-sm" />
           Edit Layout
         </button>
-        <SharePanel seating={seating} desks={desks} onImport={onImport} />
+        <SharePanel seating={seating} desks={desks} zones={zones} deskNames={deskNames} unavailableDesks={unavailableDesks} onImport={onImport} />
       </div>
     </header>
   )
