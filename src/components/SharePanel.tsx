@@ -28,7 +28,19 @@ export function SharePanel({ seating, onImport }: SharePanelProps) {
 
   const handleCopyLink = async () => {
     const url = buildShareUrl(seating)
-    await navigator.clipboard.writeText(url)
+    try {
+      await navigator.clipboard.writeText(url)
+    } catch {
+      // Fallback for denied permission or missing API
+      const textArea = document.createElement('textarea')
+      textArea.value = url
+      textArea.style.position = 'fixed'
+      textArea.style.opacity = '0'
+      document.body.appendChild(textArea)
+      textArea.select()
+      document.execCommand('copy')
+      document.body.removeChild(textArea)
+    }
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
@@ -40,6 +52,10 @@ export function SharePanel({ seating, onImport }: SharePanelProps) {
   const handleImport = async () => {
     try {
       const imported = await importSeatingJson()
+      const confirmed = window.confirm(
+        'This will replace your current arrangement. Continue?',
+      )
+      if (!confirmed) return
       onImport(imported)
       setOpen(false)
     } catch {
