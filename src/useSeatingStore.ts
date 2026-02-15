@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect, useRef } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import type { Desk, SeatingMap } from './types'
 import { defaultSeating, employees } from './data'
 
@@ -21,31 +21,7 @@ function saveSeating(seating: SeatingMap) {
 export function useSeatingStore(desks: Desk[]) {
   const [seating, setSeating] = useState<SeatingMap>(loadSeating)
 
-  // Clean up seating when desks change (e.g., zone removed or resized)
-  const prevDeskIdsRef = useRef<string>('')
-  useEffect(() => {
-    const validDeskIds = new Set(desks.map((d) => d.id))
-    const key = [...validDeskIds].sort().join(',')
-    if (prevDeskIdsRef.current === key) return
-    prevDeskIdsRef.current = key
-
-    setSeating((prev) => {
-      const next: SeatingMap = {}
-      let changed = false
-      for (const [deskId, empId] of Object.entries(prev)) {
-        if (validDeskIds.has(deskId)) {
-          next[deskId] = empId
-        } else {
-          changed = true
-        }
-      }
-      if (changed) {
-        saveSeating(next)
-        return next
-      }
-      return prev
-    })
-  }, [desks])
+  const validDeskIds = useMemo(() => new Set(desks.map((d) => d.id)), [desks])
 
   const updateSeating = useCallback((next: SeatingMap) => {
     setSeating(next)
@@ -96,10 +72,15 @@ export function useSeatingStore(desks: Desk[]) {
     updateSeating(empty)
   }, [desks, updateSeating])
 
+  // Only count employees assigned to currently-valid desks
   const unassignedEmployees = useMemo(() => {
-    const assignedIds = new Set(Object.values(seating).filter(Boolean))
+    const assignedIds = new Set(
+      Object.entries(seating)
+        .filter(([deskId, empId]) => empId && validDeskIds.has(deskId))
+        .map(([, empId]) => empId),
+    )
     return employees.filter((e) => !assignedIds.has(e.id))
-  }, [seating])
+  }, [seating, validDeskIds])
 
   const getEmployeeForDesk = useCallback(
     (deskId: string) => {
@@ -113,12 +94,12 @@ export function useSeatingStore(desks: Desk[]) {
   const getDeskForEmployee = useCallback(
     (employeeId: string) => {
       const entry = Object.entries(seating).find(
-        ([, eid]) => eid === employeeId,
+        ([deskId, eid]) => eid === employeeId && validDeskIds.has(deskId),
       )
       if (!entry) return null
       return desks.find((d) => d.id === entry[0]) ?? null
     },
-    [seating, desks],
+    [seating, desks, validDeskIds],
   )
 
   const loadShared = useCallback(
