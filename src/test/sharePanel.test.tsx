@@ -23,13 +23,14 @@ describe('SharePanel', () => {
     expect(screen.getByText('Share Arrangement')).toBeInTheDocument()
   })
 
-  it('shows copy link, export, and import buttons in the panel', async () => {
+  it('shows copy link, export, export PDF, and import buttons in the panel', async () => {
     render(<App />)
     const user = userEvent.setup()
 
     await user.click(screen.getByTestId('share-btn'))
     expect(screen.getByTestId('copy-link-btn')).toBeInTheDocument()
     expect(screen.getByTestId('export-btn')).toBeInTheDocument()
+    expect(screen.getByTestId('export-pdf-btn')).toBeInTheDocument()
     expect(screen.getByTestId('import-btn')).toBeInTheDocument()
   })
 

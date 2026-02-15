@@ -1,5 +1,6 @@
+import { jsPDF } from 'jspdf'
 import type { Desk, Zone, SeatingMap, DeskNameMap, UnavailableDeskMap } from './types'
-import { desks as defaultDesks, employees, generateDesks } from './data'
+import { desks as defaultDesks, employees, generateDesks, getDepartmentColor } from './data'
 
 const validEmployeeIds = new Set(employees.map((e) => e.id))
 
@@ -194,4 +195,226 @@ export function importSeatingJson(
     }
     input.click()
   })
+}
+
+export interface PdfExportData {
+  seating: SeatingMap
+  zones: Zone[]
+  desks: Desk[]
+  deskNames: DeskNameMap
+  unavailableDesks: UnavailableDeskMap
+}
+
+function hexToRgb(hex: string): [number, number, number] {
+  const h = hex.replace('#', '')
+  return [
+    parseInt(h.substring(0, 2), 16),
+    parseInt(h.substring(2, 4), 16),
+    parseInt(h.substring(4, 6), 16),
+  ]
+}
+
+/** Export the seating arrangement as a downloadable PDF file. */
+export function exportSeatingPdf(data: PdfExportData) {
+  const { seating, zones, desks, deskNames, unavailableDesks } = data
+  const employeeMap = new Map(employees.map((e) => [e.id, e]))
+
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
+  const pageWidth = 210
+  const margin = 15
+  const contentWidth = pageWidth - margin * 2
+  let y = margin
+
+  function checkPage(needed: number) {
+    if (y + needed > 282) {
+      doc.addPage()
+      y = margin
+    }
+  }
+
+  // --- Title ---
+  doc.setFontSize(20)
+  doc.setFont('helvetica', 'bold')
+  doc.text('Office Seating Chart', margin, y + 7)
+  y += 12
+
+  doc.setFontSize(9)
+  doc.setFont('helvetica', 'normal')
+  doc.setTextColor(120, 120, 120)
+  doc.text(`Exported ${new Date().toLocaleDateString()}`, margin, y)
+  y += 8
+
+  // --- Summary stats ---
+  const assigned = Object.values(seating).filter(Boolean).length
+  const totalDesks = desks.length
+  const unavailableCount = Object.keys(unavailableDesks).length
+  const availableDesks = totalDesks - unavailableCount
+  const totalPeople = employees.length
+
+  doc.setDrawColor(200, 200, 200)
+  doc.line(margin, y, margin + contentWidth, y)
+  y += 6
+
+  doc.setFontSize(9)
+  doc.setFont('helvetica', 'normal')
+  doc.setTextColor(80, 80, 80)
+  const stats = [
+    `${assigned} seated`,
+    `${totalPeople - assigned} unassigned`,
+    `${availableDesks - assigned} empty desks`,
+    ...(unavailableCount > 0 ? [`${unavailableCount} unavailable`] : []),
+  ]
+  doc.text(stats.join('   •   '), margin, y)
+  y += 10
+
+  // --- Zone grids ---
+  for (const zone of zones) {
+    const zoneDesks = desks.filter((d) => d.zone === zone.id)
+    const cellW = Math.min(38, (contentWidth - (zone.cols - 1) * 2) / zone.cols)
+    const cellH = 18
+    const gridHeight = zone.rows * cellH + (zone.rows - 1) * 2
+    const zoneHeight = gridHeight + 12
+
+    checkPage(zoneHeight)
+
+    // Zone heading
+    doc.setFontSize(12)
+    doc.setFont('helvetica', 'bold')
+    doc.setTextColor(50, 50, 50)
+    doc.text(zone.name, margin, y + 4)
+    y += 8
+
+    // Zone background
+    const bgColor = hexToRgb(zone.color)
+    const gridWidth = zone.cols * cellW + (zone.cols - 1) * 2
+    doc.setFillColor(bgColor[0], bgColor[1], bgColor[2])
+    doc.roundedRect(margin - 2, y - 2, gridWidth + 4, gridHeight + 4, 2, 2, 'F')
+
+    // Draw desk cells
+    for (const desk of zoneDesks) {
+      const cx = margin + desk.col * (cellW + 2)
+      const cy = y + desk.row * (cellH + 2)
+      const isUnavailable = !!unavailableDesks[desk.id]
+      const empId = seating[desk.id]
+      const emp = empId ? employeeMap.get(empId) : null
+
+      // Cell background
+      if (isUnavailable) {
+        doc.setFillColor(229, 231, 235)
+      } else if (emp) {
+        doc.setFillColor(255, 255, 255)
+      } else {
+        doc.setFillColor(249, 250, 251)
+      }
+      doc.roundedRect(cx, cy, cellW, cellH, 1.5, 1.5, 'F')
+
+      // Cell border
+      doc.setDrawColor(210, 210, 210)
+      doc.roundedRect(cx, cy, cellW, cellH, 1.5, 1.5, 'S')
+
+      if (isUnavailable) {
+        doc.setFontSize(7)
+        doc.setFont('helvetica', 'italic')
+        doc.setTextColor(160, 160, 160)
+        doc.text('N/A', cx + cellW / 2, cy + cellH / 2 + 1, { align: 'center' })
+      } else if (emp) {
+        // Department color bar
+        const deptColor = hexToRgb(getDepartmentColor(emp.department))
+        doc.setFillColor(deptColor[0], deptColor[1], deptColor[2])
+        doc.rect(cx, cy, cellW, 2.5, 'F')
+
+        // Employee name
+        doc.setFontSize(7)
+        doc.setFont('helvetica', 'bold')
+        doc.setTextColor(30, 30, 30)
+        const displayName = emp.name.length > 14 ? emp.name.substring(0, 13) + '…' : emp.name
+        doc.text(displayName, cx + 2, cy + 7.5)
+
+        // Department
+        doc.setFontSize(5.5)
+        doc.setFont('helvetica', 'normal')
+        doc.setTextColor(100, 100, 100)
+        doc.text(emp.department, cx + 2, cy + 11)
+
+        // Desk label
+        const deskLabel = deskNames[desk.id] || desk.id
+        doc.setFontSize(5)
+        doc.setTextColor(150, 150, 150)
+        doc.text(deskLabel, cx + 2, cy + 15)
+      } else {
+        // Empty desk
+        const deskLabel = deskNames[desk.id] || desk.id
+        doc.setFontSize(6)
+        doc.setFont('helvetica', 'normal')
+        doc.setTextColor(180, 180, 180)
+        doc.text(deskLabel, cx + cellW / 2, cy + cellH / 2 + 1, { align: 'center' })
+      }
+    }
+
+    y += gridHeight + 10
+  }
+
+  // --- Employee Directory ---
+  checkPage(30)
+
+  doc.setDrawColor(200, 200, 200)
+  doc.line(margin, y, margin + contentWidth, y)
+  y += 6
+
+  doc.setFontSize(12)
+  doc.setFont('helvetica', 'bold')
+  doc.setTextColor(50, 50, 50)
+  doc.text('Employee Directory', margin, y + 4)
+  y += 10
+
+  // Table header
+  const colX = [margin, margin + 55, margin + 100, margin + 140]
+  doc.setFillColor(243, 244, 246)
+  doc.rect(margin, y - 1, contentWidth, 7, 'F')
+  doc.setFontSize(7)
+  doc.setFont('helvetica', 'bold')
+  doc.setTextColor(80, 80, 80)
+  doc.text('Employee', colX[0] + 2, y + 3.5)
+  doc.text('Department', colX[1] + 2, y + 3.5)
+  doc.text('Desk', colX[2] + 2, y + 3.5)
+  doc.text('Zone', colX[3] + 2, y + 3.5)
+  y += 9
+
+  // Table rows
+  const sortedEmployees = [...employees].sort((a, b) => a.name.localeCompare(b.name))
+  for (const emp of sortedEmployees) {
+    checkPage(7)
+
+    const deskEntry = Object.entries(seating).find(([, eid]) => eid === emp.id)
+    const deskId = deskEntry ? deskEntry[0] : null
+    const desk = deskId ? desks.find((d) => d.id === deskId) : null
+    const zone = desk ? zones.find((z) => z.id === desk.zone) : null
+    const deskLabel = deskId ? (deskNames[deskId] || deskId) : '—'
+    const zoneLabel = zone ? zone.name : '—'
+
+    // Alternating row background
+    if (sortedEmployees.indexOf(emp) % 2 === 0) {
+      doc.setFillColor(249, 250, 251)
+      doc.rect(margin, y - 3.5, contentWidth, 6.5, 'F')
+    }
+
+    doc.setFontSize(7)
+    doc.setFont('helvetica', 'normal')
+    doc.setTextColor(50, 50, 50)
+    doc.text(emp.name, colX[0] + 2, y)
+
+    // Department with color indicator
+    const deptColor = hexToRgb(getDepartmentColor(emp.department))
+    doc.setFillColor(deptColor[0], deptColor[1], deptColor[2])
+    doc.circle(colX[1] + 3.5, y - 1.2, 1.2, 'F')
+    doc.text(emp.department, colX[1] + 6.5, y)
+
+    doc.setTextColor(100, 100, 100)
+    doc.text(deskLabel, colX[2] + 2, y)
+    doc.text(zoneLabel, colX[3] + 2, y)
+
+    y += 6.5
+  }
+
+  doc.save('seating-arrangement.pdf')
 }
