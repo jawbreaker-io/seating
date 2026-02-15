@@ -2,7 +2,7 @@ name: CI/CD
 
 on:
   push:
-    branches: [main, master]
+    branches: [main, master, 'claude/**']
   pull_request:
     branches: [main, master]
 
@@ -76,7 +76,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          push: ${{ github.event_name == 'push' }}
+          push: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
