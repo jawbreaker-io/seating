@@ -1,6 +1,6 @@
-import { useState, useCallback, useMemo } from 'react'
-import type { SeatingMap } from './types'
-import { defaultSeating, desks, employees } from './data'
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react'
+import type { Desk, SeatingMap } from './types'
+import { defaultSeating, employees } from './data'
 
 const STORAGE_KEY = 'seating-chart-assignments'
 
@@ -18,8 +18,34 @@ function saveSeating(seating: SeatingMap) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(seating))
 }
 
-export function useSeatingStore() {
+export function useSeatingStore(desks: Desk[]) {
   const [seating, setSeating] = useState<SeatingMap>(loadSeating)
+
+  // Clean up seating when desks change (e.g., zone removed or resized)
+  const prevDeskIdsRef = useRef<string>('')
+  useEffect(() => {
+    const validDeskIds = new Set(desks.map((d) => d.id))
+    const key = [...validDeskIds].sort().join(',')
+    if (prevDeskIdsRef.current === key) return
+    prevDeskIdsRef.current = key
+
+    setSeating((prev) => {
+      const next: SeatingMap = {}
+      let changed = false
+      for (const [deskId, empId] of Object.entries(prev)) {
+        if (validDeskIds.has(deskId)) {
+          next[deskId] = empId
+        } else {
+          changed = true
+        }
+      }
+      if (changed) {
+        saveSeating(next)
+        return next
+      }
+      return prev
+    })
+  }, [desks])
 
   const updateSeating = useCallback((next: SeatingMap) => {
     setSeating(next)
@@ -68,7 +94,7 @@ export function useSeatingStore() {
       empty[desk.id] = null
     }
     updateSeating(empty)
-  }, [updateSeating])
+  }, [desks, updateSeating])
 
   const unassignedEmployees = useMemo(() => {
     const assignedIds = new Set(Object.values(seating).filter(Boolean))
@@ -92,7 +118,7 @@ export function useSeatingStore() {
       if (!entry) return null
       return desks.find((d) => d.id === entry[0]) ?? null
     },
-    [seating],
+    [seating, desks],
   )
 
   const loadShared = useCallback(

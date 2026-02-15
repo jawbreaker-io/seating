@@ -10,7 +10,7 @@ describe('useSeatingStore', () => {
   })
 
   it('initializes with default seating when no localStorage', () => {
-    const { result } = renderHook(() => useSeatingStore())
+    const { result } = renderHook(() => useSeatingStore(desks))
     expect(result.current.seating).toEqual(defaultSeating)
   })
 
@@ -20,19 +20,19 @@ describe('useSeatingStore', () => {
       'seating-chart-assignments',
       JSON.stringify(customSeating),
     )
-    const { result } = renderHook(() => useSeatingStore())
+    const { result } = renderHook(() => useSeatingStore(desks))
     expect(result.current.seating).toEqual(customSeating)
   })
 
   it('falls back to default seating on invalid localStorage', () => {
     localStorage.setItem('seating-chart-assignments', 'invalid-json{{{')
-    const { result } = renderHook(() => useSeatingStore())
+    const { result } = renderHook(() => useSeatingStore(desks))
     expect(result.current.seating).toEqual(defaultSeating)
   })
 
   describe('assignEmployee', () => {
     it('assigns an employee to an empty desk from sidebar', () => {
-      const { result } = renderHook(() => useSeatingStore())
+      const { result } = renderHook(() => useSeatingStore(desks))
       const unassigned = result.current.unassignedEmployees
       const empId = unassigned[0].id
       const emptyDesk = desks.find(
@@ -47,7 +47,7 @@ describe('useSeatingStore', () => {
     })
 
     it('moves an employee from one desk to another empty desk', () => {
-      const { result } = renderHook(() => useSeatingStore())
+      const { result } = renderHook(() => useSeatingStore(desks))
       const sourceDeskId = 'z1-d0'
       const sourceEmp = result.current.seating[sourceDeskId]
       const emptyDesk = desks.find(
@@ -63,7 +63,7 @@ describe('useSeatingStore', () => {
     })
 
     it('swaps two employees when dropping onto occupied desk', () => {
-      const { result } = renderHook(() => useSeatingStore())
+      const { result } = renderHook(() => useSeatingStore(desks))
       const deskA = 'z1-d0'
       const deskB = 'z1-d1'
       const empA = result.current.seating[deskA]
@@ -78,7 +78,7 @@ describe('useSeatingStore', () => {
     })
 
     it('persists to localStorage on assign', () => {
-      const { result } = renderHook(() => useSeatingStore())
+      const { result } = renderHook(() => useSeatingStore(desks))
       const emptyDesk = desks.find(
         (d) => !result.current.seating[d.id],
       )!
@@ -97,7 +97,7 @@ describe('useSeatingStore', () => {
 
   describe('unassignEmployee', () => {
     it('removes an employee from a desk', () => {
-      const { result } = renderHook(() => useSeatingStore())
+      const { result } = renderHook(() => useSeatingStore(desks))
       const deskId = 'z1-d0'
       expect(result.current.seating[deskId]).toBeTruthy()
 
@@ -109,7 +109,7 @@ describe('useSeatingStore', () => {
     })
 
     it('adds unassigned employee back to unassigned list', () => {
-      const { result } = renderHook(() => useSeatingStore())
+      const { result } = renderHook(() => useSeatingStore(desks))
       const deskId = 'z1-d0'
       const empId = result.current.seating[deskId]!
       const beforeCount = result.current.unassignedEmployees.length
@@ -127,7 +127,7 @@ describe('useSeatingStore', () => {
 
   describe('resetSeating', () => {
     it('restores default seating', () => {
-      const { result } = renderHook(() => useSeatingStore())
+      const { result } = renderHook(() => useSeatingStore(desks))
 
       // Modify seating first
       act(() => {
@@ -145,7 +145,7 @@ describe('useSeatingStore', () => {
 
   describe('clearAll', () => {
     it('removes all assignments', () => {
-      const { result } = renderHook(() => useSeatingStore())
+      const { result } = renderHook(() => useSeatingStore(desks))
 
       act(() => {
         result.current.clearAll()
@@ -156,7 +156,7 @@ describe('useSeatingStore', () => {
     })
 
     it('puts all employees in unassigned list', () => {
-      const { result } = renderHook(() => useSeatingStore())
+      const { result } = renderHook(() => useSeatingStore(desks))
 
       act(() => {
         result.current.clearAll()
@@ -168,14 +168,14 @@ describe('useSeatingStore', () => {
 
   describe('getEmployeeForDesk', () => {
     it('returns employee for occupied desk', () => {
-      const { result } = renderHook(() => useSeatingStore())
+      const { result } = renderHook(() => useSeatingStore(desks))
       const emp = result.current.getEmployeeForDesk('z1-d0')
       expect(emp).not.toBeNull()
       expect(emp!.id).toBe(defaultSeating['z1-d0'])
     })
 
     it('returns null for empty desk', () => {
-      const { result } = renderHook(() => useSeatingStore())
+      const { result } = renderHook(() => useSeatingStore(desks))
       const emptyDesk = desks.find(
         (d) => !result.current.seating[d.id],
       )!
@@ -185,14 +185,14 @@ describe('useSeatingStore', () => {
 
   describe('getDeskForEmployee', () => {
     it('returns desk for seated employee', () => {
-      const { result } = renderHook(() => useSeatingStore())
+      const { result } = renderHook(() => useSeatingStore(desks))
       const desk = result.current.getDeskForEmployee('e1')
       expect(desk).not.toBeNull()
       expect(desk!.id).toBe('z1-d0')
     })
 
     it('returns null for unassigned employee', () => {
-      const { result } = renderHook(() => useSeatingStore())
+      const { result } = renderHook(() => useSeatingStore(desks))
       const unassigned = result.current.unassignedEmployees[0]
       expect(result.current.getDeskForEmployee(unassigned.id)).toBeNull()
     })
@@ -200,7 +200,7 @@ describe('useSeatingStore', () => {
 
   describe('unassignedEmployees', () => {
     it('returns employees not assigned to any desk', () => {
-      const { result } = renderHook(() => useSeatingStore())
+      const { result } = renderHook(() => useSeatingStore(desks))
       const assignedIds = new Set(
         Object.values(defaultSeating).filter(Boolean),
       )

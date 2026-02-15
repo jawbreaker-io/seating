@@ -1,15 +1,16 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { HiShare, HiLink, HiDownload, HiUpload } from 'react-icons/hi'
-import type { SeatingMap } from '../types'
+import type { Desk, SeatingMap } from '../types'
 import { buildShareUrl, exportSeatingJson, importSeatingJson } from '../shareUtils'
 
 interface SharePanelProps {
   seating: SeatingMap
+  desks: Desk[]
   onImport: (seating: SeatingMap) => void
 }
 
-export function SharePanel({ seating, onImport }: SharePanelProps) {
+export function SharePanel({ seating, desks, onImport }: SharePanelProps) {
   const [open, setOpen] = useState(false)
   const [copied, setCopied] = useState(false)
   const panelRef = useRef<HTMLDivElement>(null)
@@ -51,7 +52,7 @@ export function SharePanel({ seating, onImport }: SharePanelProps) {
 
   const handleImport = async () => {
     try {
-      const imported = await importSeatingJson()
+      const imported = await importSeatingJson(desks)
       const confirmed = window.confirm(
         'This will replace your current arrangement. Continue?',
       )
