@@ -2,12 +2,14 @@ import { motion } from 'motion/react'
 import { HiOfficeBuilding } from 'react-icons/hi'
 import { employees, desks } from '../data'
 import type { SeatingMap } from '../types'
+import { SharePanel } from './SharePanel'
 
 interface HeaderProps {
   seating: SeatingMap
+  onImport: (seating: SeatingMap) => void
 }
 
-export function Header({ seating }: HeaderProps) {
+export function Header({ seating, onImport }: HeaderProps) {
   const assigned = Object.values(seating).filter(Boolean).length
   const totalDesks = desks.length
   const totalPeople = employees.length
@@ -44,6 +46,7 @@ export function Header({ seating }: HeaderProps) {
           <span className="w-2 h-2 rounded-full bg-gray-300" />
           {totalDesks - assigned} empty desks
         </div>
+        <SharePanel seating={seating} onImport={onImport} />
       </div>
     </header>
   )
