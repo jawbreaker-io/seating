@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from '../App'
@@ -49,9 +49,10 @@ describe('SharePanel', () => {
 describe('URL-based sharing', () => {
   beforeEach(() => {
     localStorage.clear()
+    vi.restoreAllMocks()
   })
 
-  it('loads a shared arrangement from URL hash on mount', () => {
+  it('loads a shared arrangement from URL hash on mount when no existing data', () => {
     // Encode a simple arrangement: only e5 at z1-d0
     const pairs = 'z1-d0:e5'
     const encoded = btoa(pairs).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
@@ -60,6 +61,25 @@ describe('URL-based sharing', () => {
     render(<App />)
 
     // After loading the shared arrangement, only 1 person should be seated
+    expect(screen.getByText('1 seated')).toBeInTheDocument()
+  })
+
+  it('prompts for confirmation when existing data is present', () => {
+    // Set up existing localStorage data so the app has a current arrangement
+    localStorage.setItem(
+      'seating-chart-assignments',
+      JSON.stringify({ 'z1-d0': 'e1' }),
+    )
+
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false)
+    const pairs = 'z1-d0:e5'
+    const encoded = btoa(pairs).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+    window.location.hash = `#share=${encoded}`
+
+    render(<App />)
+
+    expect(confirmSpy).toHaveBeenCalled()
+    // User declined — should keep original e1, not load e5
     expect(screen.getByText('1 seated')).toBeInTheDocument()
   })
 })

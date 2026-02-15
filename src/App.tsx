@@ -24,8 +24,16 @@ function App() {
     loadedRef.current = true
     const shared = getSharedSeating()
     if (shared) {
-      loadShared(shared)
-      // Clear the hash so subsequent reloads use localStorage
+      const hasUserData = localStorage.getItem('seating-chart-assignments') !== null
+      const shouldLoad =
+        !hasUserData ||
+        window.confirm(
+          'A shared arrangement was found in the link. Load it? This will replace your current arrangement.',
+        )
+      if (shouldLoad) {
+        loadShared(shared)
+      }
+      // Clear the hash regardless so subsequent reloads use localStorage
       window.history.replaceState(null, '', window.location.pathname)
     }
   }, [loadShared])
