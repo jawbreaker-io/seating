@@ -1,14 +1,17 @@
-import type { SeatingMap } from './types'
-import { desks, employees } from './data'
+import type { Desk, SeatingMap } from './types'
+import { desks as defaultDesks, employees } from './data'
 
-const validDeskIds = new Set(desks.map((d) => d.id))
 const validEmployeeIds = new Set(employees.map((e) => e.id))
 
 /**
  * Validate a SeatingMap, stripping any entries with unknown desk or employee IDs.
  * Returns a clean SeatingMap with all known desks present (null for empty).
  */
-export function validateSeating(raw: Record<string, unknown>): SeatingMap {
+export function validateSeating(
+  raw: Record<string, unknown>,
+  desks: Desk[] = defaultDesks,
+): SeatingMap {
+  const validDeskIds = new Set(desks.map((d) => d.id))
   const seating: SeatingMap = {}
   for (const desk of desks) {
     seating[desk.id] = null
@@ -42,9 +45,12 @@ export function encodeSeating(seating: SeatingMap): string {
  * Decode a URL-safe string back into a SeatingMap.
  * Returns null if the string is invalid.
  */
-export function decodeSeating(encoded: string): SeatingMap | null {
+export function decodeSeating(
+  encoded: string,
+  desks: Desk[] = defaultDesks,
+): SeatingMap | null {
   try {
-    if (!encoded) return validateSeating({})
+    if (!encoded) return validateSeating({}, desks)
 
     const padded = encoded.replace(/-/g, '+').replace(/_/g, '/')
     const decoded = atob(padded)
@@ -59,7 +65,7 @@ export function decodeSeating(encoded: string): SeatingMap | null {
       }
     }
 
-    return validateSeating(raw)
+    return validateSeating(raw, desks)
   } catch {
     return null
   }
@@ -74,11 +80,13 @@ export function buildShareUrl(seating: SeatingMap): string {
 }
 
 /** Extract a shared arrangement from the current URL hash, if present. */
-export function getSharedSeating(): SeatingMap | null {
+export function getSharedSeating(
+  desks: Desk[] = defaultDesks,
+): SeatingMap | null {
   const hash = window.location.hash
   const match = hash.match(/^#share=(.+)$/)
   if (!match) return null
-  return decodeSeating(match[1])
+  return decodeSeating(match[1], desks)
 }
 
 /** Export the seating arrangement as a downloadable JSON file. */
@@ -94,7 +102,9 @@ export function exportSeatingJson(seating: SeatingMap) {
 }
 
 /** Import a seating arrangement from a JSON file. Returns a promise with the SeatingMap. */
-export function importSeatingJson(): Promise<SeatingMap> {
+export function importSeatingJson(
+  desks: Desk[] = defaultDesks,
+): Promise<SeatingMap> {
   return new Promise((resolve, reject) => {
     const input = document.createElement('input')
     input.type = 'file'
@@ -113,7 +123,7 @@ export function importSeatingJson(): Promise<SeatingMap> {
             reject(new Error('Invalid seating file'))
             return
           }
-          resolve(validateSeating(parsed as Record<string, unknown>))
+          resolve(validateSeating(parsed as Record<string, unknown>, desks))
         } catch {
           reject(new Error('Invalid JSON file'))
         }

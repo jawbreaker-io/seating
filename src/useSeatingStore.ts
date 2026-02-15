@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from 'react'
-import type { SeatingMap } from './types'
-import { defaultSeating, desks, employees } from './data'
+import type { Desk, SeatingMap } from './types'
+import { defaultSeating, employees } from './data'
 
 const STORAGE_KEY = 'seating-chart-assignments'
 
@@ -18,8 +18,10 @@ function saveSeating(seating: SeatingMap) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(seating))
 }
 
-export function useSeatingStore() {
+export function useSeatingStore(desks: Desk[]) {
   const [seating, setSeating] = useState<SeatingMap>(loadSeating)
+
+  const validDeskIds = useMemo(() => new Set(desks.map((d) => d.id)), [desks])
 
   const updateSeating = useCallback((next: SeatingMap) => {
     setSeating(next)
@@ -68,12 +70,17 @@ export function useSeatingStore() {
       empty[desk.id] = null
     }
     updateSeating(empty)
-  }, [updateSeating])
+  }, [desks, updateSeating])
 
+  // Only count employees assigned to currently-valid desks
   const unassignedEmployees = useMemo(() => {
-    const assignedIds = new Set(Object.values(seating).filter(Boolean))
+    const assignedIds = new Set(
+      Object.entries(seating)
+        .filter(([deskId, empId]) => empId && validDeskIds.has(deskId))
+        .map(([, empId]) => empId),
+    )
     return employees.filter((e) => !assignedIds.has(e.id))
-  }, [seating])
+  }, [seating, validDeskIds])
 
   const getEmployeeForDesk = useCallback(
     (deskId: string) => {
@@ -87,12 +94,12 @@ export function useSeatingStore() {
   const getDeskForEmployee = useCallback(
     (employeeId: string) => {
       const entry = Object.entries(seating).find(
-        ([, eid]) => eid === employeeId,
+        ([deskId, eid]) => eid === employeeId && validDeskIds.has(deskId),
       )
       if (!entry) return null
       return desks.find((d) => d.id === entry[0]) ?? null
     },
-    [seating],
+    [seating, desks, validDeskIds],
   )
 
   const loadShared = useCallback(
