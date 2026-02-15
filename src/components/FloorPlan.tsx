@@ -1,4 +1,4 @@
-import type { Zone, Desk, Employee, DeskNameMap, UnavailableDeskMap } from '../types'
+import type { Zone, Desk, Employee, DeskNameMap, UnavailableDeskMap, PinnedDeskMap } from '../types'
 import { ZoneSection } from './ZoneSection'
 
 interface FloorPlanProps {
@@ -6,11 +6,13 @@ interface FloorPlanProps {
   desks: Desk[]
   deskNames: DeskNameMap
   unavailableDesks: UnavailableDeskMap
+  pinnedDesks: PinnedDeskMap
   getEmployee: (deskId: string) => Employee | null
   onDrop: (deskId: string, employeeId: string, sourceDeskId: string | null) => void
   onRemove: (deskId: string) => void
   onDeskNameChange: (deskId: string, name: string) => void
   onToggleDeskUnavailable: (deskId: string, unavailable: boolean) => void
+  onTogglePin: (deskId: string) => void
 }
 
 export function FloorPlan({
@@ -18,11 +20,13 @@ export function FloorPlan({
   desks,
   deskNames,
   unavailableDesks,
+  pinnedDesks,
   getEmployee,
   onDrop,
   onRemove,
   onDeskNameChange,
   onToggleDeskUnavailable,
+  onTogglePin,
 }: FloorPlanProps) {
   return (
     <div className="flex-1 overflow-auto p-6">
@@ -34,11 +38,13 @@ export function FloorPlan({
             desks={desks.filter((d) => d.zone === zone.id)}
             deskNames={deskNames}
             unavailableDesks={unavailableDesks}
+            pinnedDesks={pinnedDesks}
             getEmployee={getEmployee}
             onDrop={onDrop}
             onRemove={onRemove}
             onDeskNameChange={onDeskNameChange}
             onToggleDeskUnavailable={onToggleDeskUnavailable}
+            onTogglePin={onTogglePin}
           />
         ))}
         {zones.length === 0 && (

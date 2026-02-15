@@ -7,6 +7,7 @@ interface EmployeeChipProps {
   employee: Employee
   sourceDeskId: string | null
   size?: 'sm' | 'md'
+  pinned?: boolean
   onRemove?: () => void
 }
 
@@ -14,6 +15,7 @@ export function EmployeeChip({
   employee,
   sourceDeskId,
   size = 'md',
+  pinned = false,
   onRemove,
 }: EmployeeChipProps) {
   const { startDrag, endDrag } = useDragContext()
@@ -27,9 +29,13 @@ export function EmployeeChip({
   return (
     <motion.div
       data-testid={`employee-chip-${employee.id}`}
-      className="relative group cursor-grab active:cursor-grabbing"
-      draggable
+      className={`relative group ${pinned ? 'cursor-default' : 'cursor-grab active:cursor-grabbing'}`}
+      draggable={!pinned}
       onDragStart={(e) => {
+        if (pinned) {
+          e.preventDefault()
+          return
+        }
         const event = e as unknown as React.DragEvent
         event.dataTransfer?.setData(
           'application/json',
@@ -44,17 +50,17 @@ export function EmployeeChip({
       onDragEnd={() => endDrag()}
       layout
       layoutId={`employee-${employee.id}`}
-      initial={{ scale: 0.8, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      exit={{ scale: 0.8, opacity: 0 }}
-      whileHover={{ scale: 1.1 }}
-      whileDrag={{ scale: 1.15, zIndex: 50 }}
-      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+      initial={{ scale: 0, opacity: 0, rotate: -180 }}
+      animate={{ scale: 1, opacity: 1, rotate: 0 }}
+      exit={{ scale: 0, opacity: 0, rotate: 180 }}
+      whileHover={pinned ? {} : { scale: 1.15, rotate: [0, -5, 5, 0] }}
+      whileDrag={pinned ? {} : { scale: 1.2, zIndex: 50, boxShadow: '0 8px 25px rgba(0,0,0,0.3)' }}
+      transition={{ type: 'spring', stiffness: 300, damping: 20, mass: 0.8 }}
     >
       <div
-        className={`${sizeClasses} rounded-full flex items-center justify-center text-white font-bold shadow-md`}
+        className={`${sizeClasses} rounded-full flex items-center justify-center text-white font-bold shadow-md ${pinned ? 'ring-2 ring-amber-400 ring-offset-1' : ''}`}
         style={{ backgroundColor: color }}
-        title={`${employee.name} - ${employee.department}`}
+        title={`${employee.name} - ${employee.department}${pinned ? ' (pinned)' : ''}`}
       >
         {employee.avatar}
       </div>
