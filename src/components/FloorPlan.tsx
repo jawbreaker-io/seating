@@ -1,15 +1,29 @@
-import type { Zone, Desk, Employee } from '../types'
+import type { Zone, Desk, Employee, DeskNameMap, UnavailableDeskMap } from '../types'
 import { ZoneSection } from './ZoneSection'
 
 interface FloorPlanProps {
   zones: Zone[]
   desks: Desk[]
+  deskNames: DeskNameMap
+  unavailableDesks: UnavailableDeskMap
   getEmployee: (deskId: string) => Employee | null
   onDrop: (deskId: string, employeeId: string, sourceDeskId: string | null) => void
   onRemove: (deskId: string) => void
+  onDeskNameChange: (deskId: string, name: string) => void
+  onToggleDeskUnavailable: (deskId: string, unavailable: boolean) => void
 }
 
-export function FloorPlan({ zones, desks, getEmployee, onDrop, onRemove }: FloorPlanProps) {
+export function FloorPlan({
+  zones,
+  desks,
+  deskNames,
+  unavailableDesks,
+  getEmployee,
+  onDrop,
+  onRemove,
+  onDeskNameChange,
+  onToggleDeskUnavailable,
+}: FloorPlanProps) {
   return (
     <div className="flex-1 overflow-auto p-6">
       <div className="flex flex-col gap-6 min-w-fit">
@@ -18,9 +32,13 @@ export function FloorPlan({ zones, desks, getEmployee, onDrop, onRemove }: Floor
             key={zone.id}
             zone={zone}
             desks={desks.filter((d) => d.zone === zone.id)}
+            deskNames={deskNames}
+            unavailableDesks={unavailableDesks}
             getEmployee={getEmployee}
             onDrop={onDrop}
             onRemove={onRemove}
+            onDeskNameChange={onDeskNameChange}
+            onToggleDeskUnavailable={onToggleDeskUnavailable}
           />
         ))}
         {zones.length === 0 && (

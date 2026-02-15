@@ -1,21 +1,29 @@
 import { motion } from 'motion/react'
-import type { Zone, Desk, Employee } from '../types'
+import type { Zone, Desk, Employee, DeskNameMap, UnavailableDeskMap } from '../types'
 import { DeskSlot } from './DeskSlot'
 
 interface ZoneSectionProps {
   zone: Zone
   desks: Desk[]
+  deskNames: DeskNameMap
+  unavailableDesks: UnavailableDeskMap
   getEmployee: (deskId: string) => Employee | null
   onDrop: (deskId: string, employeeId: string, sourceDeskId: string | null) => void
   onRemove: (deskId: string) => void
+  onDeskNameChange: (deskId: string, name: string) => void
+  onToggleDeskUnavailable: (deskId: string, unavailable: boolean) => void
 }
 
 export function ZoneSection({
   zone,
   desks,
+  deskNames,
+  unavailableDesks,
   getEmployee,
   onDrop,
   onRemove,
+  onDeskNameChange,
+  onToggleDeskUnavailable,
 }: ZoneSectionProps) {
   return (
     <motion.div
@@ -38,8 +46,12 @@ export function ZoneSection({
             key={desk.id}
             desk={desk}
             employee={getEmployee(desk.id)}
+            name={deskNames[desk.id]}
+            unavailable={!!unavailableDesks[desk.id]}
             onDrop={onDrop}
             onRemove={onRemove}
+            onNameChange={onDeskNameChange}
+            onToggleUnavailable={onToggleDeskUnavailable}
           />
         ))}
       </div>

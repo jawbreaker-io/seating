@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { AnimatePresence } from 'motion/react'
 import { DragProvider } from './DragContext'
 import { useLayoutStore } from './useLayoutStore'
@@ -13,10 +13,14 @@ function App() {
   const {
     zones,
     desks,
+    deskNames,
+    unavailableDesks,
     addZone,
     updateZone,
     removeZone,
     resetLayout,
+    setDeskName,
+    setDeskUnavailable,
   } = useLayoutStore()
 
   const {
@@ -52,12 +56,24 @@ function App() {
     }
   }, [loadShared, desks])
 
+  // When a desk is marked unavailable, unassign any employee sitting there
+  const handleToggleDeskUnavailable = useCallback(
+    (deskId: string, unavailable: boolean) => {
+      if (unavailable && seating[deskId]) {
+        unassignEmployee(deskId)
+      }
+      setDeskUnavailable(deskId, unavailable)
+    },
+    [seating, unassignEmployee, setDeskUnavailable],
+  )
+
   return (
     <DragProvider>
       <div className="h-screen flex flex-col bg-gray-50">
         <Header
           seating={seating}
           desks={desks}
+          unavailableDesks={unavailableDesks}
           onImport={loadShared}
           onEditLayout={() => setShowLayoutEditor(true)}
         />
@@ -65,9 +81,13 @@ function App() {
           <FloorPlan
             zones={zones}
             desks={desks}
+            deskNames={deskNames}
+            unavailableDesks={unavailableDesks}
             getEmployee={getEmployeeForDesk}
             onDrop={assignEmployee}
             onRemove={unassignEmployee}
+            onDeskNameChange={setDeskName}
+            onToggleDeskUnavailable={handleToggleDeskUnavailable}
           />
           <Sidebar
             unassigned={unassignedEmployees}
