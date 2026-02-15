@@ -76,8 +76,8 @@ function App() {
       <div className="h-screen flex flex-col bg-gray-50">
         <Header
           seating={seating}
-          desks={desks}
           zones={zones}
+          desks={desks}
           deskNames={deskNames}
           unavailableDesks={unavailableDesks}
           onImport={loadShared}

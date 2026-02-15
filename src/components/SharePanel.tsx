@@ -1,19 +1,20 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { HiShare, HiLink, HiDownload, HiUpload } from 'react-icons/hi'
+import { HiDocumentText } from 'react-icons/hi'
 import type { Desk, Zone, SeatingMap, DeskNameMap, UnavailableDeskMap } from '../types'
-import { buildShareUrl, exportSeatingJson, importSeatingJson } from '../shareUtils'
+import { buildShareUrl, exportSeatingJson, exportSeatingPdf, importSeatingJson } from '../shareUtils'
 
 interface SharePanelProps {
   seating: SeatingMap
-  desks: Desk[]
   zones: Zone[]
+  desks: Desk[]
   deskNames: DeskNameMap
   unavailableDesks: UnavailableDeskMap
   onImport: (seating: SeatingMap) => void
 }
 
-export function SharePanel({ seating, desks, zones, deskNames, unavailableDesks, onImport }: SharePanelProps) {
+export function SharePanel({ seating, zones, desks, deskNames, unavailableDesks, onImport }: SharePanelProps) {
   const [open, setOpen] = useState(false)
   const [copied, setCopied] = useState(false)
   const panelRef = useRef<HTMLDivElement>(null)
@@ -51,6 +52,10 @@ export function SharePanel({ seating, desks, zones, deskNames, unavailableDesks,
 
   const handleExport = () => {
     exportSeatingJson(seating)
+  }
+
+  const handleExportPdf = () => {
+    exportSeatingPdf({ seating, zones, desks, deskNames, unavailableDesks })
   }
 
   const handleImport = async () => {
@@ -123,6 +128,22 @@ export function SharePanel({ seating, desks, zones, deskNames, unavailableDesks,
                 </p>
               </div>
             </button>
+
+            <button
+              data-testid="export-pdf-btn"
+              onClick={handleExportPdf}
+              className="w-full flex items-center gap-2 text-xs px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-left"
+            >
+              <HiDocumentText className="text-red-500 text-base flex-shrink-0" />
+              <div className="flex-1">
+                <span className="font-medium text-gray-700">Export as PDF</span>
+                <p className="text-[10px] text-gray-400">
+                  Download printable floor plan
+                </p>
+              </div>
+            </button>
+
+            <hr className="my-2 border-gray-100" />
 
             <button
               data-testid="import-btn"

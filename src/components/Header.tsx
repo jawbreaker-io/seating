@@ -6,15 +6,15 @@ import { SharePanel } from './SharePanel'
 
 interface HeaderProps {
   seating: SeatingMap
-  desks: Desk[]
   zones: Zone[]
+  desks: Desk[]
   deskNames: DeskNameMap
   unavailableDesks: UnavailableDeskMap
   onImport: (seating: SeatingMap) => void
   onEditLayout: () => void
 }
 
-export function Header({ seating, desks, zones, deskNames, unavailableDesks, onImport, onEditLayout }: HeaderProps) {
+export function Header({ seating, zones, desks, deskNames, unavailableDesks, onImport, onEditLayout }: HeaderProps) {
   const assigned = Object.values(seating).filter(Boolean).length
   const totalDesks = desks.length
   const unavailableCount = Object.keys(unavailableDesks).length
@@ -67,7 +67,7 @@ export function Header({ seating, desks, zones, deskNames, unavailableDesks, onI
           <HiPencil className="text-sm" />
           Edit Layout
         </button>
-        <SharePanel seating={seating} desks={desks} zones={zones} deskNames={deskNames} unavailableDesks={unavailableDesks} onImport={onImport} />
+        <SharePanel seating={seating} zones={zones} desks={desks} deskNames={deskNames} unavailableDesks={unavailableDesks} onImport={onImport} />
       </div>
     </header>
   )
