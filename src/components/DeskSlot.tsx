@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import type { Desk, Employee } from '../types'
 import { EmployeeChip } from './EmployeeChip'
-import { useDragContext } from '../DragContext'
+import { useDragContext } from '../useDragContext'
 import type { DragItem } from '../types'
 
 interface DeskSlotProps {

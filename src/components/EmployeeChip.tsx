@@ -1,7 +1,7 @@
 import { motion } from 'motion/react'
 import type { Employee } from '../types'
 import { getDepartmentColor } from '../data'
-import { useDragContext } from '../DragContext'
+import { useDragContext } from '../useDragContext'
 
 interface EmployeeChipProps {
   employee: Employee

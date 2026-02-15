@@ -1,22 +1,7 @@
-import { createContext, useContext, useState, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import type { ReactNode } from 'react'
 import type { DragItem } from './types'
-
-interface DragContextValue {
-  dragItem: DragItem | null
-  startDrag: (item: DragItem) => void
-  endDrag: () => void
-}
-
-const DragCtx = createContext<DragContextValue>({
-  dragItem: null,
-  startDrag: () => {},
-  endDrag: () => {},
-})
-
-export function useDragContext() {
-  return useContext(DragCtx)
-}
+import { DragCtx } from './dragContextValue'
 
 export function DragProvider({ children }: { children: ReactNode }) {
   const [dragItem, setDragItem] = useState<DragItem | null>(null)

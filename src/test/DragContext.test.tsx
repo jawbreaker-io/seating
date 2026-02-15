@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen, act } from '@testing-library/react'
-import { DragProvider, useDragContext } from '../DragContext'
+import { DragProvider } from '../DragContext'
+import { useDragContext } from '../useDragContext'
 import type { DragItem } from '../types'
 
 function TestConsumer() {
