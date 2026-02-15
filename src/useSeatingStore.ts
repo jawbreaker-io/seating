@@ -95,12 +95,20 @@ export function useSeatingStore() {
     [seating],
   )
 
+  const loadShared = useCallback(
+    (shared: SeatingMap) => {
+      updateSeating(shared)
+    },
+    [updateSeating],
+  )
+
   return {
     seating,
     assignEmployee,
     unassignEmployee,
     resetSeating,
     clearAll,
+    loadShared,
     unassignedEmployees,
     getEmployeeForDesk,
     getDeskForEmployee,
