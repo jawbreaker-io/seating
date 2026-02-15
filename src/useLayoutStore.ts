@@ -159,6 +159,17 @@ export function useLayoutStore() {
     })
   }, [])
 
+  const loadSharedLayout = useCallback(
+    (sharedZones: Zone[], sharedDeskNames: DeskNameMap, sharedUnavailable: UnavailableDeskMap) => {
+      updateZones(sharedZones)
+      setDeskNames(sharedDeskNames)
+      saveDeskNames(sharedDeskNames)
+      setUnavailableDesks(sharedUnavailable)
+      saveUnavailableDesks(sharedUnavailable)
+    },
+    [updateZones],
+  )
+
   return {
     zones,
     desks,
@@ -170,5 +181,6 @@ export function useLayoutStore() {
     resetLayout,
     setDeskName,
     setDeskUnavailable,
+    loadSharedLayout,
   }
 }

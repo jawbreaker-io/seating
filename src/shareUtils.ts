@@ -1,7 +1,15 @@
-import type { Desk, SeatingMap } from './types'
-import { desks as defaultDesks, employees } from './data'
+import type { Desk, Zone, SeatingMap, DeskNameMap, UnavailableDeskMap } from './types'
+import { desks as defaultDesks, employees, generateDesks } from './data'
 
 const validEmployeeIds = new Set(employees.map((e) => e.id))
+
+/** Data included in a shareable link. */
+export interface SharePayload {
+  zones: Zone[]
+  seating: SeatingMap
+  deskNames: DeskNameMap
+  unavailableDesks: UnavailableDeskMap
+}
 
 /**
  * Validate a SeatingMap, stripping any entries with unknown desk or employee IDs.
@@ -71,22 +79,75 @@ export function decodeSeating(
   }
 }
 
-/** Build a shareable URL from the current arrangement. */
-export function buildShareUrl(seating: SeatingMap): string {
-  const encoded = encodeSeating(seating)
+/**
+ * Encode a full share payload (zones + seating + desk names + unavailable desks)
+ * into a compact URL-safe base64url string.
+ */
+export function encodeSharePayload(payload: SharePayload): string {
+  const compact: Record<string, unknown> = {
+    z: payload.zones,
+    s: Object.fromEntries(
+      Object.entries(payload.seating).filter(([, v]) => v != null),
+    ),
+  }
+  if (Object.keys(payload.deskNames).length > 0) {
+    compact.n = payload.deskNames
+  }
+  if (Object.keys(payload.unavailableDesks).length > 0) {
+    compact.u = payload.unavailableDesks
+  }
+  const json = JSON.stringify(compact)
+  return btoa(json).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+}
+
+/**
+ * Decode a base64url string back into a SharePayload.
+ * Falls back to the legacy seating-only format for old links.
+ */
+export function decodeSharePayload(
+  encoded: string,
+  desks: Desk[] = defaultDesks,
+): SharePayload | null {
+  try {
+    if (!encoded) return null
+
+    const padded = encoded.replace(/-/g, '+').replace(/_/g, '/')
+    const decoded = atob(padded)
+
+    // Try JSON format first (new format)
+    if (decoded.startsWith('{')) {
+      const parsed = JSON.parse(decoded)
+      const zones: Zone[] = parsed.z ?? []
+      const generatedDesks = zones.length > 0 ? generateDesks(zones) : desks
+      const seating = validateSeating(parsed.s ?? {}, generatedDesks)
+      const deskNames: DeskNameMap = parsed.n ?? {}
+      const unavailableDesks: UnavailableDeskMap = parsed.u ?? {}
+      return { zones, seating, deskNames, unavailableDesks }
+    }
+
+    // Legacy format: comma-separated deskId:empId pairs
+    const seating = decodeSeating(encoded, desks)
+    if (!seating) return null
+    return { zones: [], seating, deskNames: {}, unavailableDesks: {} }
+  } catch {
+    return null
+  }
+}
+
+/** Build a shareable URL from the current arrangement and layout. */
+export function buildShareUrl(payload: SharePayload): string {
+  const encoded = encodeSharePayload(payload)
   const url = new URL(window.location.href)
   url.hash = `share=${encoded}`
   return url.toString()
 }
 
-/** Extract a shared arrangement from the current URL hash, if present. */
-export function getSharedSeating(
-  desks: Desk[] = defaultDesks,
-): SeatingMap | null {
+/** Extract shared data from the current URL hash, if present. */
+export function getSharedData(): SharePayload | null {
   const hash = window.location.hash
   const match = hash.match(/^#share=(.+)$/)
   if (!match) return null
-  return decodeSeating(match[1], desks)
+  return decodeSharePayload(match[1])
 }
 
 /** Export the seating arrangement as a downloadable JSON file. */

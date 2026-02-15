@@ -1,16 +1,19 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { HiShare, HiLink, HiDownload, HiUpload } from 'react-icons/hi'
-import type { Desk, SeatingMap } from '../types'
+import type { Desk, Zone, SeatingMap, DeskNameMap, UnavailableDeskMap } from '../types'
 import { buildShareUrl, exportSeatingJson, importSeatingJson } from '../shareUtils'
 
 interface SharePanelProps {
   seating: SeatingMap
   desks: Desk[]
+  zones: Zone[]
+  deskNames: DeskNameMap
+  unavailableDesks: UnavailableDeskMap
   onImport: (seating: SeatingMap) => void
 }
 
-export function SharePanel({ seating, desks, onImport }: SharePanelProps) {
+export function SharePanel({ seating, desks, zones, deskNames, unavailableDesks, onImport }: SharePanelProps) {
   const [open, setOpen] = useState(false)
   const [copied, setCopied] = useState(false)
   const panelRef = useRef<HTMLDivElement>(null)
@@ -28,7 +31,7 @@ export function SharePanel({ seating, desks, onImport }: SharePanelProps) {
   }, [open])
 
   const handleCopyLink = async () => {
-    const url = buildShareUrl(seating)
+    const url = buildShareUrl({ zones, seating, deskNames, unavailableDesks })
     try {
       await navigator.clipboard.writeText(url)
     } catch {

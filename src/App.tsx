@@ -7,7 +7,7 @@ import { Header } from './components/Header'
 import { FloorPlan } from './components/FloorPlan'
 import { Sidebar } from './components/Sidebar'
 import { LayoutEditor } from './components/LayoutEditor'
-import { getSharedSeating } from './shareUtils'
+import { getSharedData } from './shareUtils'
 
 function App() {
   const {
@@ -21,6 +21,7 @@ function App() {
     resetLayout,
     setDeskName,
     setDeskUnavailable,
+    loadSharedLayout,
   } = useLayoutStore()
 
   const {
@@ -40,7 +41,7 @@ function App() {
   useEffect(() => {
     if (loadedRef.current) return
     loadedRef.current = true
-    const shared = getSharedSeating(desks)
+    const shared = getSharedData()
     if (shared) {
       const hasUserData = localStorage.getItem('seating-chart-assignments') !== null
       const shouldLoad =
@@ -49,12 +50,15 @@ function App() {
           'A shared arrangement was found in the link. Load it? This will replace your current arrangement.',
         )
       if (shouldLoad) {
-        loadShared(shared)
+        if (shared.zones.length > 0) {
+          loadSharedLayout(shared.zones, shared.deskNames, shared.unavailableDesks)
+        }
+        loadShared(shared.seating)
       }
       // Clear the hash regardless so subsequent reloads use localStorage
       window.history.replaceState(null, '', window.location.pathname)
     }
-  }, [loadShared, desks])
+  }, [loadShared, loadSharedLayout])
 
   // When a desk is marked unavailable, unassign any employee sitting there
   const handleToggleDeskUnavailable = useCallback(
@@ -73,6 +77,8 @@ function App() {
         <Header
           seating={seating}
           desks={desks}
+          zones={zones}
+          deskNames={deskNames}
           unavailableDesks={unavailableDesks}
           onImport={loadShared}
           onEditLayout={() => setShowLayoutEditor(true)}
