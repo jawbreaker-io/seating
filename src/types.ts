@@ -24,9 +24,19 @@ export type SeatingMap = Record<string, string | null> // deskId -> employeeId |
 
 export type DeskNameMap = Record<string, string> // deskId -> custom name
 export type UnavailableDeskMap = Record<string, boolean> // deskId -> true if unavailable
+export type PinnedDeskMap = Record<string, boolean> // deskId -> true if employee is pinned to this desk
 
 export interface DragItem {
   type: 'employee'
   employeeId: string
   sourceDeskId: string | null // null if from sidebar (unassigned)
+}
+
+export type OptimizationMode = 'full' | 'minimize-moves'
+
+export interface OptimizationResult {
+  seating: SeatingMap
+  moves: number
+  clusterScore: number
+  previousScore: number
 }

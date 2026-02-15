@@ -1,8 +1,9 @@
 import { useState, useCallback, useMemo } from 'react'
-import type { Desk, SeatingMap } from './types'
+import type { Desk, SeatingMap, PinnedDeskMap } from './types'
 import { defaultSeating, employees } from './data'
 
 const STORAGE_KEY = 'seating-chart-assignments'
+const PINNED_STORAGE_KEY = 'seating-chart-pinned'
 
 function loadSeating(): SeatingMap {
   try {
@@ -18,8 +19,23 @@ function saveSeating(seating: SeatingMap) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(seating))
 }
 
+function loadPinnedDesks(): PinnedDeskMap {
+  try {
+    const stored = localStorage.getItem(PINNED_STORAGE_KEY)
+    if (stored) return JSON.parse(stored) as PinnedDeskMap
+  } catch {
+    // fall through to default
+  }
+  return {}
+}
+
+function savePinnedDesks(pinned: PinnedDeskMap) {
+  localStorage.setItem(PINNED_STORAGE_KEY, JSON.stringify(pinned))
+}
+
 export function useSeatingStore(desks: Desk[]) {
   const [seating, setSeating] = useState<SeatingMap>(loadSeating)
+  const [pinnedDesks, setPinnedDesks] = useState<PinnedDeskMap>(loadPinnedDesks)
 
   const validDeskIds = useMemo(() => new Set(desks.map((d) => d.id)), [desks])
 
@@ -31,14 +47,16 @@ export function useSeatingStore(desks: Desk[]) {
   const assignEmployee = useCallback(
     (deskId: string, employeeId: string, sourceDeskId: string | null) => {
       setSeating((prev) => {
+        // Block drops onto pinned desks or moves from pinned desks
+        if (pinnedDesks[deskId] || (sourceDeskId && pinnedDesks[sourceDeskId])) {
+          return prev
+        }
         const next = { ...prev }
         const currentOccupant = next[deskId]
 
         if (sourceDeskId && currentOccupant) {
-          // Swap: move current occupant to source desk
           next[sourceDeskId] = currentOccupant
         } else if (sourceDeskId) {
-          // Move from another desk to empty desk
           next[sourceDeskId] = null
         }
 
@@ -47,17 +65,37 @@ export function useSeatingStore(desks: Desk[]) {
         return next
       })
     },
-    [],
+    [pinnedDesks],
   )
 
-  const unassignEmployee = useCallback((deskId: string) => {
-    setSeating((prev) => {
-      const next = { ...prev }
-      next[deskId] = null
-      saveSeating(next)
-      return next
-    })
-  }, [])
+  const unassignEmployee = useCallback(
+    (deskId: string) => {
+      if (pinnedDesks[deskId]) return
+      setSeating((prev) => {
+        const next = { ...prev }
+        next[deskId] = null
+        saveSeating(next)
+        return next
+      })
+    },
+    [pinnedDesks],
+  )
+
+  const togglePin = useCallback(
+    (deskId: string) => {
+      setPinnedDesks((prev) => {
+        const next = { ...prev }
+        if (next[deskId]) {
+          delete next[deskId]
+        } else {
+          next[deskId] = true
+        }
+        savePinnedDesks(next)
+        return next
+      })
+    },
+    [],
+  )
 
   const resetSeating = useCallback(() => {
     const fresh = { ...defaultSeating }
@@ -67,10 +105,14 @@ export function useSeatingStore(desks: Desk[]) {
   const clearAll = useCallback(() => {
     const empty: SeatingMap = {}
     for (const desk of desks) {
-      empty[desk.id] = null
+      if (pinnedDesks[desk.id] && seating[desk.id]) {
+        empty[desk.id] = seating[desk.id]
+      } else {
+        empty[desk.id] = null
+      }
     }
     updateSeating(empty)
-  }, [desks, updateSeating])
+  }, [desks, pinnedDesks, seating, updateSeating])
 
   // Only count employees assigned to currently-valid desks
   const unassignedEmployees = useMemo(() => {
@@ -109,13 +151,24 @@ export function useSeatingStore(desks: Desk[]) {
     [updateSeating],
   )
 
+  const loadSharedPins = useCallback(
+    (shared: PinnedDeskMap) => {
+      setPinnedDesks(shared)
+      savePinnedDesks(shared)
+    },
+    [],
+  )
+
   return {
     seating,
+    pinnedDesks,
     assignEmployee,
     unassignEmployee,
+    togglePin,
     resetSeating,
     clearAll,
     loadShared,
+    loadSharedPins,
     unassignedEmployees,
     getEmployeeForDesk,
     getDeskForEmployee,

@@ -1,5 +1,5 @@
 import { motion } from 'motion/react'
-import type { Zone, Desk, Employee, DeskNameMap, UnavailableDeskMap } from '../types'
+import type { Zone, Desk, Employee, DeskNameMap, UnavailableDeskMap, PinnedDeskMap } from '../types'
 import { DeskSlot } from './DeskSlot'
 
 interface ZoneSectionProps {
@@ -7,11 +7,13 @@ interface ZoneSectionProps {
   desks: Desk[]
   deskNames: DeskNameMap
   unavailableDesks: UnavailableDeskMap
+  pinnedDesks: PinnedDeskMap
   getEmployee: (deskId: string) => Employee | null
   onDrop: (deskId: string, employeeId: string, sourceDeskId: string | null) => void
   onRemove: (deskId: string) => void
   onDeskNameChange: (deskId: string, name: string) => void
   onToggleDeskUnavailable: (deskId: string, unavailable: boolean) => void
+  onTogglePin: (deskId: string) => void
 }
 
 export function ZoneSection({
@@ -19,11 +21,13 @@ export function ZoneSection({
   desks,
   deskNames,
   unavailableDesks,
+  pinnedDesks,
   getEmployee,
   onDrop,
   onRemove,
   onDeskNameChange,
   onToggleDeskUnavailable,
+  onTogglePin,
 }: ZoneSectionProps) {
   return (
     <motion.div
@@ -48,10 +52,12 @@ export function ZoneSection({
             employee={getEmployee(desk.id)}
             name={deskNames[desk.id]}
             unavailable={!!unavailableDesks[desk.id]}
+            pinned={!!pinnedDesks[desk.id]}
             onDrop={onDrop}
             onRemove={onRemove}
             onNameChange={onDeskNameChange}
             onToggleUnavailable={onToggleDeskUnavailable}
+            onTogglePin={onTogglePin}
           />
         ))}
       </div>

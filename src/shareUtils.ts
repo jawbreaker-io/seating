@@ -1,5 +1,5 @@
 import { jsPDF } from 'jspdf'
-import type { Desk, Zone, SeatingMap, DeskNameMap, UnavailableDeskMap } from './types'
+import type { Desk, Zone, SeatingMap, DeskNameMap, UnavailableDeskMap, PinnedDeskMap } from './types'
 import { desks as defaultDesks, employees, generateDesks, getDepartmentColor } from './data'
 
 const validEmployeeIds = new Set(employees.map((e) => e.id))
@@ -10,6 +10,7 @@ export interface SharePayload {
   seating: SeatingMap
   deskNames: DeskNameMap
   unavailableDesks: UnavailableDeskMap
+  pinnedDesks?: PinnedDeskMap
 }
 
 /**
@@ -97,6 +98,9 @@ export function encodeSharePayload(payload: SharePayload): string {
   if (Object.keys(payload.unavailableDesks).length > 0) {
     compact.u = payload.unavailableDesks
   }
+  if (payload.pinnedDesks && Object.keys(payload.pinnedDesks).length > 0) {
+    compact.p = payload.pinnedDesks
+  }
   const json = JSON.stringify(compact)
   return btoa(json).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
 }
@@ -123,7 +127,8 @@ export function decodeSharePayload(
       const seating = validateSeating(parsed.s ?? {}, generatedDesks)
       const deskNames: DeskNameMap = parsed.n ?? {}
       const unavailableDesks: UnavailableDeskMap = parsed.u ?? {}
-      return { zones, seating, deskNames, unavailableDesks }
+      const pinnedDesks: PinnedDeskMap = parsed.p ?? {}
+      return { zones, seating, deskNames, unavailableDesks, pinnedDesks }
     }
 
     // Legacy format: comma-separated deskId:empId pairs

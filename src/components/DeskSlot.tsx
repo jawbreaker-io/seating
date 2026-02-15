@@ -11,10 +11,12 @@ interface DeskSlotProps {
   employee: Employee | null
   name?: string
   unavailable?: boolean
+  pinned?: boolean
   onDrop: (deskId: string, employeeId: string, sourceDeskId: string | null) => void
   onRemove: (deskId: string) => void
   onNameChange?: (deskId: string, name: string) => void
   onToggleUnavailable?: (deskId: string, unavailable: boolean) => void
+  onTogglePin?: (deskId: string) => void
 }
 
 export function DeskSlot({
@@ -22,10 +24,12 @@ export function DeskSlot({
   employee,
   name,
   unavailable = false,
+  pinned = false,
   onDrop,
   onRemove,
   onNameChange,
   onToggleUnavailable,
+  onTogglePin,
 }: DeskSlotProps) {
   const [isOver, setIsOver] = useState(false)
   const [isEditingName, setIsEditingName] = useState(false)
@@ -51,6 +55,8 @@ export function DeskSlot({
     setIsOver(false)
   }
 
+  const [justDropped, setJustDropped] = useState(false)
+
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault()
     setIsOver(false)
@@ -62,6 +68,8 @@ export function DeskSlot({
       if (data.type === 'employee') {
         if (data.sourceDeskId === desk.id) return
         onDrop(desk.id, data.employeeId, data.sourceDeskId)
+        setJustDropped(true)
+        setTimeout(() => setJustDropped(false), 400)
       }
     } catch {
       // ignore invalid drops
@@ -146,22 +154,45 @@ export function DeskSlot({
     )
   }
 
+  const handleTogglePin = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    onTogglePin?.(desk.id)
+  }
+
   return (
     <motion.div
       data-testid={`desk-${desk.id}`}
       className={`
-        relative w-20 h-20 rounded-xl border-2 border-dashed
+        relative w-20 h-20 rounded-xl border-2
         flex flex-col items-center justify-center gap-1
         transition-colors duration-150 group
-        ${showDropTarget ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white'}
-        ${employee ? 'border-solid border-gray-200 shadow-sm' : ''}
+        ${pinned ? 'border-solid border-amber-400 bg-amber-50 ring-1 ring-amber-200' : ''}
+        ${showDropTarget && !pinned ? 'border-dashed border-blue-500 bg-blue-50' : ''}
+        ${!pinned && !showDropTarget && employee ? 'border-solid border-gray-200 shadow-sm' : ''}
+        ${!pinned && !showDropTarget && !employee ? 'border-dashed border-gray-300 bg-white' : ''}
       `}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       layout
+      animate={justDropped ? { scale: [1, 1.08, 0.95, 1.03, 1] } : { scale: 1 }}
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
     >
+      {pinned && (
+        <motion.div
+          className="absolute -top-1.5 -left-1.5 z-10"
+          initial={{ scale: 0, rotate: -45 }}
+          animate={{ scale: 1, rotate: 0 }}
+          exit={{ scale: 0, rotate: 45 }}
+          transition={{ type: 'spring', stiffness: 500, damping: 20 }}
+        >
+          <div className="w-4 h-4 bg-amber-400 rounded-full flex items-center justify-center shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="white" className="w-2.5 h-2.5">
+              <path d="M8.5 1.5a.5.5 0 0 0-1 0v4.586L5.354 3.94a.5.5 0 1 0-.708.708L7 7.001V12.5a.5.5 0 0 0 .146.354l1.5 1.5a.5.5 0 0 0 .708-.708L8.5 12.793V7.001l2.354-2.354a.5.5 0 0 0-.708-.708L8.5 5.586V1.5z" />
+            </svg>
+          </div>
+        </motion.div>
+      )}
       <AnimatePresence mode="popLayout">
         {employee ? (
           <EmployeeChip
@@ -169,7 +200,8 @@ export function DeskSlot({
             employee={employee}
             sourceDeskId={desk.id}
             size="sm"
-            onRemove={() => onRemove(desk.id)}
+            pinned={pinned}
+            onRemove={pinned ? undefined : () => onRemove(desk.id)}
           />
         ) : (
           <motion.div
@@ -183,6 +215,22 @@ export function DeskSlot({
           </motion.div>
         )}
       </AnimatePresence>
+      {employee && (
+        <button
+          data-testid={`desk-pin-toggle-${desk.id}`}
+          onClick={handleTogglePin}
+          className={`absolute top-0.5 left-0.5 p-0.5 rounded transition-opacity ${
+            pinned
+              ? 'opacity-100 text-amber-500 hover:text-amber-700'
+              : 'opacity-0 group-hover:opacity-100 text-gray-300 hover:text-amber-500'
+          }`}
+          title={pinned ? 'Unpin employee' : 'Pin employee to this desk'}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3">
+            <path d="M8.5 1.5a.5.5 0 0 0-1 0v4.586L5.354 3.94a.5.5 0 1 0-.708.708L7 7.001V12.5a.5.5 0 0 0 .146.354l1.5 1.5a.5.5 0 0 0 .708-.708L8.5 12.793V7.001l2.354-2.354a.5.5 0 0 0-.708-.708L8.5 5.586V1.5z" />
+          </svg>
+        </button>
+      )}
       <button
         data-testid={`desk-unavailable-toggle-${desk.id}`}
         onClick={handleToggleUnavailable}

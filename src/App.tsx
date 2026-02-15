@@ -7,6 +7,7 @@ import { Header } from './components/Header'
 import { FloorPlan } from './components/FloorPlan'
 import { Sidebar } from './components/Sidebar'
 import { LayoutEditor } from './components/LayoutEditor'
+import { OptimizePanel } from './components/OptimizePanel'
 import { getSharedData } from './shareUtils'
 
 function App() {
@@ -26,16 +27,20 @@ function App() {
 
   const {
     seating,
+    pinnedDesks,
     assignEmployee,
     unassignEmployee,
+    togglePin,
     resetSeating,
     clearAll,
     loadShared,
+    loadSharedPins,
     unassignedEmployees,
     getEmployeeForDesk,
   } = useSeatingStore(desks)
 
   const [showLayoutEditor, setShowLayoutEditor] = useState(false)
+  const [showOptimizer, setShowOptimizer] = useState(false)
 
   const loadedRef = useRef(false)
   useEffect(() => {
@@ -54,11 +59,14 @@ function App() {
           loadSharedLayout(shared.zones, shared.deskNames, shared.unavailableDesks)
         }
         loadShared(shared.seating)
+        if (shared.pinnedDesks) {
+          loadSharedPins(shared.pinnedDesks)
+        }
       }
       // Clear the hash regardless so subsequent reloads use localStorage
       window.history.replaceState(null, '', window.location.pathname)
     }
-  }, [loadShared, loadSharedLayout])
+  }, [loadShared, loadSharedLayout, loadSharedPins])
 
   // When a desk is marked unavailable, unassign any employee sitting there
   const handleToggleDeskUnavailable = useCallback(
@@ -80,8 +88,10 @@ function App() {
           desks={desks}
           deskNames={deskNames}
           unavailableDesks={unavailableDesks}
+          pinnedDesks={pinnedDesks}
           onImport={loadShared}
           onEditLayout={() => setShowLayoutEditor(true)}
+          onOptimize={() => setShowOptimizer(true)}
         />
         <div className="flex flex-1 overflow-hidden">
           <FloorPlan
@@ -89,11 +99,13 @@ function App() {
             desks={desks}
             deskNames={deskNames}
             unavailableDesks={unavailableDesks}
+            pinnedDesks={pinnedDesks}
             getEmployee={getEmployeeForDesk}
             onDrop={assignEmployee}
             onRemove={unassignEmployee}
             onDeskNameChange={setDeskName}
             onToggleDeskUnavailable={handleToggleDeskUnavailable}
+            onTogglePin={togglePin}
           />
           <Sidebar
             unassigned={unassignedEmployees}
@@ -111,6 +123,18 @@ function App() {
             onRemoveZone={removeZone}
             onResetLayout={resetLayout}
             onClose={() => setShowLayoutEditor(false)}
+          />
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {showOptimizer && (
+          <OptimizePanel
+            seating={seating}
+            desks={desks}
+            pinnedDesks={pinnedDesks}
+            unavailableDesks={unavailableDesks}
+            onApply={loadShared}
+            onClose={() => setShowOptimizer(false)}
           />
         )}
       </AnimatePresence>
