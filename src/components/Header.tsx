@@ -1,19 +1,22 @@
 import { motion } from 'motion/react'
 import { HiOfficeBuilding, HiPencil } from 'react-icons/hi'
 import { employees } from '../data'
-import type { Desk, SeatingMap } from '../types'
+import type { Desk, SeatingMap, UnavailableDeskMap } from '../types'
 import { SharePanel } from './SharePanel'
 
 interface HeaderProps {
   seating: SeatingMap
   desks: Desk[]
+  unavailableDesks: UnavailableDeskMap
   onImport: (seating: SeatingMap) => void
   onEditLayout: () => void
 }
 
-export function Header({ seating, desks, onImport, onEditLayout }: HeaderProps) {
+export function Header({ seating, desks, unavailableDesks, onImport, onEditLayout }: HeaderProps) {
   const assigned = Object.values(seating).filter(Boolean).length
   const totalDesks = desks.length
+  const unavailableCount = Object.keys(unavailableDesks).length
+  const availableDesks = totalDesks - unavailableCount
   const totalPeople = employees.length
 
   return (
@@ -46,8 +49,14 @@ export function Header({ seating, desks, onImport, onEditLayout }: HeaderProps) 
         </div>
         <div className="flex items-center gap-1">
           <span className="w-2 h-2 rounded-full bg-gray-300" />
-          {totalDesks - assigned} empty desks
+          {availableDesks - assigned} empty desks
         </div>
+        {unavailableCount > 0 && (
+          <div className="flex items-center gap-1">
+            <span className="w-2 h-2 rounded-full bg-red-300" />
+            {unavailableCount} N/A
+          </div>
+        )}
         <button
           data-testid="edit-layout-btn"
           onClick={onEditLayout}

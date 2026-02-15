@@ -22,6 +22,9 @@ export interface Zone {
 
 export type SeatingMap = Record<string, string | null> // deskId -> employeeId | null
 
+export type DeskNameMap = Record<string, string> // deskId -> custom name
+export type UnavailableDeskMap = Record<string, boolean> // deskId -> true if unavailable
+
 export interface DragItem {
   type: 'employee'
   employeeId: string
