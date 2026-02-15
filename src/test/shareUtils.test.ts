@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { encodeSeating, decodeSeating, buildShareUrl, getSharedSeating } from '../shareUtils'
+import { encodeSeating, decodeSeating, buildShareUrl, getSharedSeating, validateSeating } from '../shareUtils'
 import { defaultSeating, desks } from '../data'
 import type { SeatingMap } from '../types'
 
@@ -78,5 +78,43 @@ describe('getSharedSeating', () => {
     const result = getSharedSeating()
     expect(result).not.toBeNull()
     expect(result!['z1-d0']).toBe('e1')
+  })
+})
+
+describe('validateSeating', () => {
+  it('strips unknown desk IDs', () => {
+    const result = validateSeating({ 'z1-d0': 'e1', 'fake-desk': 'e2' })
+    expect(result['z1-d0']).toBe('e1')
+    expect(result).not.toHaveProperty('fake-desk')
+  })
+
+  it('strips unknown employee IDs', () => {
+    const result = validateSeating({ 'z1-d0': 'e1', 'z1-d1': 'fake-emp' })
+    expect(result['z1-d0']).toBe('e1')
+    expect(result['z1-d1']).toBeNull()
+  })
+
+  it('strips non-string values', () => {
+    const result = validateSeating({ 'z1-d0': 123, 'z1-d1': true, 'z1-d2': null })
+    expect(result['z1-d0']).toBeNull()
+    expect(result['z1-d1']).toBeNull()
+    expect(result['z1-d2']).toBeNull()
+  })
+
+  it('returns all desks with null for empty input', () => {
+    const result = validateSeating({})
+    for (const desk of desks) {
+      expect(result[desk.id]).toBeNull()
+    }
+    expect(Object.keys(result)).toHaveLength(desks.length)
+  })
+
+  it('preserves valid assignments', () => {
+    const result = validateSeating(defaultSeating)
+    for (const [deskId, empId] of Object.entries(defaultSeating)) {
+      if (empId) {
+        expect(result[deskId]).toBe(empId)
+      }
+    }
   })
 })
