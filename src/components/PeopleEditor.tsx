@@ -167,8 +167,8 @@ export function PeopleEditor({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
-          <h2 className="text-base font-bold text-gray-800">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+          <h2 className="text-lg font-bold text-gray-800">
             Edit People & Departments
           </h2>
           <button
@@ -215,7 +215,7 @@ export function PeopleEditor({
               {/* Add new person form */}
               <div className="flex items-end gap-2 p-3 bg-blue-50 rounded-xl">
                 <div className="flex-1">
-                  <label className="text-[10px] text-gray-500 block mb-1">Name</label>
+                  <label className="text-xs text-gray-500 block mb-1">Name</label>
                   <input
                     data-testid="new-employee-name"
                     type="text"
@@ -227,7 +227,7 @@ export function PeopleEditor({
                   />
                 </div>
                 <div className="w-40">
-                  <label className="text-[10px] text-gray-500 block mb-1">Department</label>
+                  <label className="text-xs text-gray-500 block mb-1">Department</label>
                   <select
                     data-testid="new-employee-dept"
                     value={newDept}
@@ -245,7 +245,7 @@ export function PeopleEditor({
                   data-testid="add-employee-btn"
                   onClick={handleAddEmployee}
                   disabled={!newName.trim() || !newDept}
-                  className="flex items-center gap-1 text-xs px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors font-medium"
+                  className="flex items-center gap-1 text-sm px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors font-medium"
                 >
                   <HiPlus className="text-sm" />
                   Add
@@ -276,7 +276,7 @@ export function PeopleEditor({
                   >
                     {/* Avatar */}
                     <div
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0"
+                      className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
                       style={{ backgroundColor: getDepartmentColor(emp.department) }}
                     >
                       {emp.avatar}
@@ -328,7 +328,7 @@ export function PeopleEditor({
                             {emp.name}
                           </p>
                           <p
-                            className="text-[10px] font-medium"
+                            className="text-xs font-medium"
                             style={{ color: getDepartmentColor(emp.department) }}
                           >
                             {emp.department}
@@ -378,7 +378,7 @@ export function PeopleEditor({
               {/* Add new department form */}
               <div className="flex items-end gap-2 p-3 bg-purple-50 rounded-xl">
                 <div className="flex-1">
-                  <label className="text-[10px] text-gray-500 block mb-1">Department Name</label>
+                  <label className="text-xs text-gray-500 block mb-1">Department Name</label>
                   <input
                     data-testid="new-dept-name"
                     type="text"
@@ -390,13 +390,13 @@ export function PeopleEditor({
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] text-gray-500 block mb-1">Color</label>
+                  <label className="text-xs text-gray-500 block mb-1">Color</label>
                   <div className="flex gap-1">
                     {DEPT_COLORS.map((color) => (
                       <button
                         key={color}
                         onClick={() => setNewDeptColor(color)}
-                        className={`w-5 h-5 rounded-full border-2 transition-transform ${
+                        className={`w-6 h-6 rounded-full border-2 transition-transform ${
                           newDeptColor === color
                             ? 'border-gray-600 scale-125'
                             : 'border-transparent hover:scale-110'
@@ -410,7 +410,7 @@ export function PeopleEditor({
                   data-testid="add-dept-btn"
                   onClick={handleAddDepartment}
                   disabled={!newDeptName.trim() || departments.includes(newDeptName.trim())}
-                  className="flex items-center gap-1 text-xs px-3 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors font-medium"
+                  className="flex items-center gap-1 text-sm px-3 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors font-medium"
                 >
                   <HiPlus className="text-sm" />
                   Add
@@ -433,7 +433,7 @@ export function PeopleEditor({
                     <div className="flex items-center gap-3">
                       {/* Color indicator */}
                       <div
-                        className="w-6 h-6 rounded-full flex-shrink-0"
+                        className="w-7 h-7 rounded-full flex-shrink-0"
                         style={{ backgroundColor: getDepartmentColor(dept) }}
                       />
 
@@ -470,7 +470,7 @@ export function PeopleEditor({
                             <p className="text-sm font-semibold text-gray-800">
                               {dept}
                             </p>
-                            <p className="text-[10px] text-gray-500">
+                            <p className="text-xs text-gray-500">
                               {employeeCountByDept(dept)} {employeeCountByDept(dept) === 1 ? 'person' : 'people'}
                             </p>
                           </div>
@@ -504,13 +504,13 @@ export function PeopleEditor({
 
                     {/* Color picker */}
                     {editingDeptName !== dept && (
-                      <div className="flex items-center gap-1.5 mt-2 ml-9">
-                        <span className="text-[10px] text-gray-500 mr-1">Color</span>
+                      <div className="flex items-center gap-1.5 mt-2 ml-10">
+                        <span className="text-xs text-gray-500 mr-1">Color</span>
                         {DEPT_COLORS.map((color) => (
                           <button
                             key={color}
                             onClick={() => onSetDepartmentColor(dept, color)}
-                            className={`w-4 h-4 rounded-full border-2 transition-transform ${
+                            className={`w-5 h-5 rounded-full border-2 transition-transform ${
                               getDepartmentColor(dept) === color
                                 ? 'border-gray-600 scale-125'
                                 : 'border-transparent hover:scale-110'
@@ -534,19 +534,19 @@ export function PeopleEditor({
         </div>
 
         {/* Footer */}
-        <div className="px-5 py-4 border-t border-gray-200 flex items-center gap-2">
+        <div className="px-6 py-4 border-t border-gray-200 flex items-center gap-2">
           <div className="flex-1" />
           <button
             data-testid="reset-people-btn"
             onClick={onResetPeople}
-            className="text-xs px-3 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+            className="text-sm px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors font-medium"
           >
             Reset Default
           </button>
           <button
             data-testid="people-done-btn"
             onClick={onClose}
-            className="text-xs px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            className="text-sm px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
           >
             Done
           </button>

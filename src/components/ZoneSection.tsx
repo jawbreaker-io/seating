@@ -40,11 +40,11 @@ export function ZoneSection({
       animate={{ opacity: 1, y: 0 }}
       transition={{ type: 'spring', stiffness: 200, damping: 20 }}
     >
-      <h3 className="text-sm font-semibold text-gray-700 mb-3">{zone.name}</h3>
+      <h3 className="text-base font-semibold text-gray-700 mb-3">{zone.name}</h3>
       <div
-        className="grid gap-3"
+        className="grid gap-4"
         style={{
-          gridTemplateColumns: `repeat(${zone.cols}, 5rem)`,
+          gridTemplateColumns: `repeat(${zone.cols}, 6rem)`,
         }}
       >
         {desks.map((desk) => (

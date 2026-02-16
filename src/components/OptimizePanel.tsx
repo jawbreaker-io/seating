@@ -93,10 +93,10 @@ export function OptimizePanel({
         {/* Header */}
         <div className="p-5 border-b border-gray-100">
           <div className="flex items-center gap-2 mb-1">
-            <HiSparkles className="text-purple-500 text-lg" />
-            <h2 className="text-base font-bold text-gray-800">Optimize Seating</h2>
+            <HiSparkles className="text-purple-500 text-xl" />
+            <h2 className="text-lg font-bold text-gray-800">Optimize Seating</h2>
           </div>
-          <p className="text-xs text-gray-500">
+          <p className="text-sm text-gray-500">
             Group employees by department to keep teams together
           </p>
         </div>
@@ -114,12 +114,12 @@ export function OptimizePanel({
               }`}
             >
               <div className="flex items-center gap-2 mb-1">
-                <HiSwitchHorizontal className={`text-sm ${mode === 'minimize-moves' ? 'text-blue-500' : 'text-gray-400'}`} />
-                <span className={`text-xs font-semibold ${mode === 'minimize-moves' ? 'text-blue-700' : 'text-gray-700'}`}>
+                <HiSwitchHorizontal className={`text-base ${mode === 'minimize-moves' ? 'text-blue-500' : 'text-gray-400'}`} />
+                <span className={`text-sm font-semibold ${mode === 'minimize-moves' ? 'text-blue-700' : 'text-gray-700'}`}>
                   Minimize Moves
                 </span>
               </div>
-              <p className="text-[10px] text-gray-500">
+              <p className="text-xs text-gray-500">
                 Improve grouping with fewest office changes
               </p>
             </button>
@@ -133,12 +133,12 @@ export function OptimizePanel({
               }`}
             >
               <div className="flex items-center gap-2 mb-1">
-                <HiLightningBolt className={`text-sm ${mode === 'full' ? 'text-purple-500' : 'text-gray-400'}`} />
-                <span className={`text-xs font-semibold ${mode === 'full' ? 'text-purple-700' : 'text-gray-700'}`}>
+                <HiLightningBolt className={`text-base ${mode === 'full' ? 'text-purple-500' : 'text-gray-400'}`} />
+                <span className={`text-sm font-semibold ${mode === 'full' ? 'text-purple-700' : 'text-gray-700'}`}>
                   Full Optimize
                 </span>
               </div>
-              <p className="text-[10px] text-gray-500">
+              <p className="text-xs text-gray-500">
                 Best grouping regardless of move count
               </p>
             </button>
@@ -149,18 +149,18 @@ export function OptimizePanel({
         <div className="px-5 pb-3">
           <div className="grid grid-cols-3 gap-3">
             <div className="bg-gray-50 rounded-lg p-3 text-center">
-              <div className="text-lg font-bold text-gray-800">{result.moves}</div>
-              <div className="text-[10px] text-gray-500 font-medium">Moves Required</div>
+              <div className="text-xl font-bold text-gray-800">{result.moves}</div>
+              <div className="text-xs text-gray-500 font-medium">Moves Required</div>
             </div>
             <div className="bg-gray-50 rounded-lg p-3 text-center">
-              <div className={`text-lg font-bold ${scoreImprovement > 0 ? 'text-green-600' : 'text-gray-800'}`}>
+              <div className={`text-xl font-bold ${scoreImprovement > 0 ? 'text-green-600' : 'text-gray-800'}`}>
                 {scoreImprovement > 0 ? '+' : ''}{scoreImprovement}
               </div>
-              <div className="text-[10px] text-gray-500 font-medium">Score Change</div>
+              <div className="text-xs text-gray-500 font-medium">Score Change</div>
             </div>
             <div className="bg-gray-50 rounded-lg p-3 text-center">
-              <div className="text-lg font-bold text-amber-600">{pinnedCount}</div>
-              <div className="text-[10px] text-gray-500 font-medium">Pinned</div>
+              <div className="text-xl font-bold text-amber-600">{pinnedCount}</div>
+              <div className="text-xs text-gray-500 font-medium">Pinned</div>
             </div>
           </div>
         </div>
@@ -169,7 +169,7 @@ export function OptimizePanel({
         <div className="flex-1 overflow-y-auto px-5 pb-3">
           {movedEmployees.length > 0 ? (
             <div className="space-y-1.5">
-              <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
                 Proposed Changes
               </p>
               {movedEmployees.map(({ empId, fromDesk, toDesk }, i) => {
@@ -178,25 +178,25 @@ export function OptimizePanel({
                 return (
                   <motion.div
                     key={empId}
-                    className="flex items-center gap-2 p-2 rounded-lg bg-gray-50 text-xs"
+                    className="flex items-center gap-2 p-2 rounded-lg bg-gray-50 text-sm"
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: i * 0.03 }}
                   >
                     <div
-                      className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[8px] font-bold flex-shrink-0"
+                      className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0"
                       style={{ backgroundColor: getDepartmentColor(emp.department) }}
                     >
                       {emp.avatar}
                     </div>
                     <span className="font-medium text-gray-700 flex-1 truncate">{emp.name}</span>
-                    <span className="text-gray-400 text-[10px] flex-shrink-0">
+                    <span className="text-gray-400 text-xs flex-shrink-0">
                       {deskNames[fromDesk] || fromDesk.split('-').pop()?.toUpperCase()}
                     </span>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3 text-gray-300 flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5 text-gray-300 flex-shrink-0">
                       <path fillRule="evenodd" d="M2 8a.75.75 0 0 1 .75-.75h8.69L8.22 4.03a.75.75 0 0 1 1.06-1.06l4.5 4.5a.75.75 0 0 1 0 1.06l-4.5 4.5a.75.75 0 0 1-1.06-1.06l3.22-3.22H2.75A.75.75 0 0 1 2 8Z" clipRule="evenodd" />
                     </svg>
-                    <span className="text-gray-700 text-[10px] font-medium flex-shrink-0">
+                    <span className="text-gray-700 text-xs font-medium flex-shrink-0">
                       {deskNames[toDesk] || toDesk.split('-').pop()?.toUpperCase()}
                     </span>
                   </motion.div>
@@ -216,7 +216,7 @@ export function OptimizePanel({
         <div className="p-4 border-t border-gray-100 flex gap-3">
           <button
             onClick={onClose}
-            className="flex-1 text-xs px-4 py-2.5 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium"
+            className="flex-1 text-sm px-4 py-2.5 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium"
           >
             Cancel
           </button>
@@ -224,7 +224,7 @@ export function OptimizePanel({
             data-testid="optimize-apply-btn"
             onClick={handleApply}
             disabled={movedEmployees.length === 0 || applied}
-            className={`flex-1 text-xs px-4 py-2.5 rounded-xl font-medium transition-all flex items-center justify-center gap-2 ${
+            className={`flex-1 text-sm px-4 py-2.5 rounded-xl font-medium transition-all flex items-center justify-center gap-2 ${
               applied
                 ? 'bg-green-500 text-white'
                 : movedEmployees.length === 0

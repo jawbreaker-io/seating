@@ -110,7 +110,7 @@ export function DeskSlot({
     return (
       <motion.div
         data-testid={`desk-${desk.id}`}
-        className="relative w-20 h-20 rounded-xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center gap-1 bg-gray-100 group"
+        className="relative w-24 h-24 rounded-xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center gap-1 bg-gray-100 group"
         style={{
           backgroundImage:
             'repeating-linear-gradient(135deg, transparent, transparent 5px, rgba(0,0,0,0.03) 5px, rgba(0,0,0,0.03) 10px)',
@@ -118,15 +118,15 @@ export function DeskSlot({
         layout
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       >
-        <HiBan className="text-gray-300 text-lg" />
-        <span className="text-[9px] text-gray-400 font-medium">N/A</span>
+        <HiBan className="text-gray-300 text-xl" />
+        <span className="text-[11px] text-gray-400 font-medium">N/A</span>
         <button
           data-testid={`desk-unavailable-toggle-${desk.id}`}
           onClick={handleToggleUnavailable}
           className="absolute top-0.5 right-0.5 p-0.5 rounded opacity-0 group-hover:opacity-100 hover:bg-white/60 transition-opacity text-gray-400 hover:text-green-500"
           title="Mark as available"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5">
             <path fillRule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14Zm3.844-8.791a.75.75 0 0 0-1.188-.918l-3.7 4.79-1.649-1.833a.75.75 0 1 0-1.114 1.004l2.25 2.5a.75.75 0 0 0 1.15-.043l4.25-5.5Z" clipRule="evenodd" />
           </svg>
         </button>
@@ -139,14 +139,14 @@ export function DeskSlot({
             onChange={(e) => setEditValue(e.target.value)}
             onBlur={handleNameSubmit}
             onKeyDown={handleNameKeyDown}
-            className="absolute bottom-0.5 w-16 text-[9px] text-center bg-white border border-gray-300 rounded px-0.5 py-0 focus:outline-none focus:ring-1 focus:ring-blue-300"
+            className="absolute bottom-0.5 w-20 text-[11px] text-center bg-white border border-gray-300 rounded px-0.5 py-0 focus:outline-none focus:ring-1 focus:ring-blue-300"
             maxLength={12}
           />
         ) : (
           <span
             onClick={handleLabelClick}
             data-testid={`desk-label-${desk.id}`}
-            className="text-[9px] text-gray-400 absolute bottom-1 cursor-pointer hover:text-gray-600 truncate max-w-[4.5rem]"
+            className="text-[11px] text-gray-400 absolute bottom-1 cursor-pointer hover:text-gray-600 truncate max-w-[5.5rem]"
             title={`Click to rename${name ? `: ${name}` : ''}`}
           >
             {displayLabel}
@@ -165,7 +165,7 @@ export function DeskSlot({
     <motion.div
       data-testid={`desk-${desk.id}`}
       className={`
-        relative w-20 h-20 rounded-xl border-2
+        relative w-24 h-24 rounded-xl border-2
         flex flex-col items-center justify-center gap-1
         transition-colors duration-150 group
         ${pinned ? 'border-solid border-amber-400 bg-amber-50 ring-1 ring-amber-200' : ''}
@@ -188,8 +188,8 @@ export function DeskSlot({
           exit={{ scale: 0, rotate: 45 }}
           transition={{ type: 'spring', stiffness: 500, damping: 20 }}
         >
-          <div className="w-4 h-4 bg-amber-400 rounded-full flex items-center justify-center shadow-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="white" className="w-2.5 h-2.5">
+          <div className="w-5 h-5 bg-amber-400 rounded-full flex items-center justify-center shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="white" className="w-3 h-3">
               <path d="M8.5 1.5a.5.5 0 0 0-1 0v4.586L5.354 3.94a.5.5 0 1 0-.708.708L7 7.001V12.5a.5.5 0 0 0 .146.354l1.5 1.5a.5.5 0 0 0 .708-.708L8.5 12.793V7.001l2.354-2.354a.5.5 0 0 0-.708-.708L8.5 5.586V1.5z" />
             </svg>
           </div>
@@ -212,7 +212,7 @@ export function DeskSlot({
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.4 }}
             exit={{ opacity: 0 }}
-            className="text-gray-400 text-[10px] text-center"
+            className="text-gray-400 text-xs text-center"
           >
             Empty
           </motion.div>
@@ -229,7 +229,7 @@ export function DeskSlot({
           }`}
           title={pinned ? 'Unpin employee' : 'Pin employee to this desk'}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5">
             <path d="M8.5 1.5a.5.5 0 0 0-1 0v4.586L5.354 3.94a.5.5 0 1 0-.708.708L7 7.001V12.5a.5.5 0 0 0 .146.354l1.5 1.5a.5.5 0 0 0 .708-.708L8.5 12.793V7.001l2.354-2.354a.5.5 0 0 0-.708-.708L8.5 5.586V1.5z" />
           </svg>
         </button>
@@ -240,7 +240,7 @@ export function DeskSlot({
         className="absolute top-0.5 right-0.5 p-0.5 rounded opacity-0 group-hover:opacity-100 hover:bg-gray-100 transition-opacity text-gray-300 hover:text-red-400"
         title="Mark as unavailable"
       >
-        <HiBan className="w-3 h-3" />
+        <HiBan className="w-3.5 h-3.5" />
       </button>
       {isEditingName ? (
         <input
@@ -251,14 +251,14 @@ export function DeskSlot({
           onChange={(e) => setEditValue(e.target.value)}
           onBlur={handleNameSubmit}
           onKeyDown={handleNameKeyDown}
-          className="absolute bottom-0.5 w-16 text-[9px] text-center bg-white border border-gray-300 rounded px-0.5 py-0 focus:outline-none focus:ring-1 focus:ring-blue-300"
+          className="absolute bottom-0.5 w-20 text-[11px] text-center bg-white border border-gray-300 rounded px-0.5 py-0 focus:outline-none focus:ring-1 focus:ring-blue-300"
           maxLength={12}
         />
       ) : (
         <span
           onClick={handleLabelClick}
           data-testid={`desk-label-${desk.id}`}
-          className="text-[9px] text-gray-400 absolute bottom-1 cursor-pointer hover:text-gray-600 truncate max-w-[4.5rem]"
+          className="text-[11px] text-gray-400 absolute bottom-1 cursor-pointer hover:text-gray-600 truncate max-w-[5.5rem]"
           title={`Click to rename${name ? `: ${name}` : ''}`}
         >
           {displayLabel}
