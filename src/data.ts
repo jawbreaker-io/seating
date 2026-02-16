@@ -1,5 +1,7 @@
 import type { Employee, Zone, Desk, SeatingMap } from './types'
 
+export const UNKNOWN_DEPARTMENT = 'Unknown'
+
 export const DEFAULT_DEPARTMENT_COLORS: Record<string, string> = {
   Engineering: '#3b82f6',
   Design: '#a855f7',
@@ -9,6 +11,7 @@ export const DEFAULT_DEPARTMENT_COLORS: Record<string, string> = {
   Finance: '#eab308',
   Product: '#06b6d4',
   Operations: '#6366f1',
+  [UNKNOWN_DEPARTMENT]: '#6b7280',
 }
 
 export function getDepartmentColor(department: string, customColors?: Record<string, string>): string {
