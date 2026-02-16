@@ -31,8 +31,8 @@ export function FloorPlan({
   onTogglePin,
 }: FloorPlanProps) {
   return (
-    <div className="flex-1 overflow-auto p-6">
-      <div className="flex flex-col gap-6 min-w-fit">
+    <div className="flex-1 overflow-auto p-8">
+      <div className="flex flex-col gap-8 min-w-fit">
         {zones.map((zone) => (
           <ZoneSection
             key={zone.id}

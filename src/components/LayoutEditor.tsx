@@ -70,8 +70,8 @@ export function LayoutEditor({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
-          <h2 className="text-base font-bold text-gray-800">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+          <h2 className="text-lg font-bold text-gray-800">
             Edit Office Layout
           </h2>
           <button
@@ -112,14 +112,14 @@ export function LayoutEditor({
 
                     {/* Color picker */}
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] text-gray-500 mr-1">
+                      <span className="text-xs text-gray-500 mr-1">
                         Color
                       </span>
                       {ZONE_COLORS.map((color) => (
                         <button
                           key={color}
                           onClick={() => onUpdateZone(zone.id, { color })}
-                          className={`w-5 h-5 rounded-full border-2 transition-transform ${
+                          className={`w-6 h-6 rounded-full border-2 transition-transform ${
                             zone.color === color
                               ? 'border-gray-600 scale-125'
                               : 'border-transparent hover:scale-110'
@@ -132,7 +132,7 @@ export function LayoutEditor({
                     {/* Rows and cols */}
                     <div className="flex gap-4">
                       <label className="flex items-center gap-2">
-                        <span className="text-[10px] text-gray-500">Rows</span>
+                        <span className="text-xs text-gray-500">Rows</span>
                         <input
                           data-testid={`zone-rows-${zone.id}`}
                           type="number"
@@ -151,7 +151,7 @@ export function LayoutEditor({
                         />
                       </label>
                       <label className="flex items-center gap-2">
-                        <span className="text-[10px] text-gray-500">Cols</span>
+                        <span className="text-xs text-gray-500">Cols</span>
                         <input
                           data-testid={`zone-cols-${zone.id}`}
                           type="number"
@@ -169,7 +169,7 @@ export function LayoutEditor({
                           className="w-14 text-sm bg-white/70 border border-gray-200 rounded-lg px-2 py-1 text-center focus:outline-none focus:ring-2 focus:ring-blue-300"
                         />
                       </label>
-                      <span className="text-[10px] text-gray-400 self-center">
+                      <span className="text-xs text-gray-400 self-center">
                         {zone.rows * zone.cols} desks
                       </span>
                     </div>
@@ -205,27 +205,27 @@ export function LayoutEditor({
         </div>
 
         {/* Footer */}
-        <div className="px-5 py-4 border-t border-gray-200 flex items-center gap-2">
+        <div className="px-6 py-4 border-t border-gray-200 flex items-center gap-2">
           <button
             data-testid="add-zone-btn"
             onClick={handleAddZone}
-            className="flex items-center gap-1.5 text-xs px-3 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors font-medium"
+            className="flex items-center gap-1.5 text-sm px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors font-medium"
           >
-            <HiPlus className="text-sm" />
+            <HiPlus className="text-base" />
             Add Zone
           </button>
           <div className="flex-1" />
           <button
             data-testid="reset-layout-btn"
             onClick={onResetLayout}
-            className="text-xs px-3 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+            className="text-sm px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors font-medium"
           >
             Reset Default
           </button>
           <button
             data-testid="layout-done-btn"
             onClick={onClose}
-            className="text-xs px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            className="text-sm px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
           >
             Done
           </button>
