@@ -256,4 +256,73 @@ describe('resetToDefault', () => {
     const loaded = onLoad.mock.calls[0][0] as SharePayload
     expect(loaded.zones[0].name).toBe('Custom Zone')
   })
+
+  it('clears all seating-chart-* localStorage keys on reset', async () => {
+    // Populate localStorage with app data
+    localStorage.setItem('seating-chart-assignments', JSON.stringify({ 'z1-d0': 'e1' }))
+    localStorage.setItem('seating-chart-pinned', JSON.stringify({ 'z1-d0': true }))
+    localStorage.setItem('seating-chart-layout', JSON.stringify([]))
+    localStorage.setItem('seating-chart-desk-names', JSON.stringify({ 'z1-d0': 'Desk A' }))
+    localStorage.setItem('seating-chart-unavailable', JSON.stringify({ 'z1-d1': true }))
+    localStorage.setItem('seating-chart-employees', JSON.stringify([]))
+    localStorage.setItem('seating-chart-dept-colors', JSON.stringify({}))
+    // Non-app key should be left alone
+    localStorage.setItem('other-app-key', 'keep-me')
+
+    const onLoad = vi.fn()
+    const onFallbackReset = vi.fn()
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response('Not Found', { status: 404 }),
+    )
+
+    const { result } = renderHook(() => useDefaultLayout(onLoad, onFallbackReset))
+    await new Promise((r) => setTimeout(r, 50))
+
+    await act(async () => {
+      await result.current.resetToDefault()
+    })
+
+    // All seating-chart-* keys should be removed
+    expect(localStorage.getItem('seating-chart-assignments')).toBeNull()
+    expect(localStorage.getItem('seating-chart-pinned')).toBeNull()
+    expect(localStorage.getItem('seating-chart-layout')).toBeNull()
+    expect(localStorage.getItem('seating-chart-desk-names')).toBeNull()
+    expect(localStorage.getItem('seating-chart-unavailable')).toBeNull()
+    expect(localStorage.getItem('seating-chart-employees')).toBeNull()
+    expect(localStorage.getItem('seating-chart-dept-colors')).toBeNull()
+    // Non-app key should survive
+    expect(localStorage.getItem('other-app-key')).toBe('keep-me')
+    expect(onFallbackReset).toHaveBeenCalledTimes(1)
+  })
+
+  it('clears browser caches on reset when Cache API is available', async () => {
+    const deleteFn = vi.fn().mockResolvedValue(true)
+    const keysFn = vi.fn().mockResolvedValue(['v1-cache', 'v2-cache'])
+    Object.defineProperty(globalThis, 'caches', {
+      value: { keys: keysFn, delete: deleteFn },
+      writable: true,
+      configurable: true,
+    })
+
+    const onLoad = vi.fn()
+    const onFallbackReset = vi.fn()
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response('Not Found', { status: 404 }),
+    )
+
+    const { result } = renderHook(() => useDefaultLayout(onLoad, onFallbackReset))
+    await new Promise((r) => setTimeout(r, 50))
+
+    await act(async () => {
+      await result.current.resetToDefault()
+    })
+
+    expect(keysFn).toHaveBeenCalled()
+    expect(deleteFn).toHaveBeenCalledWith('v1-cache')
+    expect(deleteFn).toHaveBeenCalledWith('v2-cache')
+
+    // Clean up
+    // @ts-expect-error - cleaning up test global
+    delete globalThis.caches
+  })
 })

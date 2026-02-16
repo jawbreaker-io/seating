@@ -100,6 +100,8 @@ export function useSeatingStore(desks: Desk[], employees: Employee[]) {
   const resetSeating = useCallback(() => {
     const fresh = { ...defaultSeating }
     updateSeating(fresh)
+    setPinnedDesks({})
+    savePinnedDesks({})
   }, [updateSeating])
 
   const clearAll = useCallback(() => {
