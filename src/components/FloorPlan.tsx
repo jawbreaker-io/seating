@@ -8,6 +8,7 @@ interface FloorPlanProps {
   unavailableDesks: UnavailableDeskMap
   pinnedDesks: PinnedDeskMap
   getEmployee: (deskId: string) => Employee | null
+  getDepartmentColor: (department: string) => string
   onDrop: (deskId: string, employeeId: string, sourceDeskId: string | null) => void
   onRemove: (deskId: string) => void
   onDeskNameChange: (deskId: string, name: string) => void
@@ -22,6 +23,7 @@ export function FloorPlan({
   unavailableDesks,
   pinnedDesks,
   getEmployee,
+  getDepartmentColor,
   onDrop,
   onRemove,
   onDeskNameChange,
@@ -40,6 +42,7 @@ export function FloorPlan({
             unavailableDesks={unavailableDesks}
             pinnedDesks={pinnedDesks}
             getEmployee={getEmployee}
+            getDepartmentColor={getDepartmentColor}
             onDrop={onDrop}
             onRemove={onRemove}
             onDeskNameChange={onDeskNameChange}

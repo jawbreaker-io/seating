@@ -1,6 +1,6 @@
 import type { Employee, Zone, Desk, SeatingMap } from './types'
 
-const DEPARTMENT_COLORS: Record<string, string> = {
+export const DEFAULT_DEPARTMENT_COLORS: Record<string, string> = {
   Engineering: '#3b82f6',
   Design: '#a855f7',
   Marketing: '#f97316',
@@ -11,8 +11,9 @@ const DEPARTMENT_COLORS: Record<string, string> = {
   Operations: '#6366f1',
 }
 
-export function getDepartmentColor(department: string): string {
-  return DEPARTMENT_COLORS[department] ?? '#6b7280'
+export function getDepartmentColor(department: string, customColors?: Record<string, string>): string {
+  if (customColors && customColors[department]) return customColors[department]
+  return DEFAULT_DEPARTMENT_COLORS[department] ?? '#6b7280'
 }
 
 export const employees: Employee[] = [

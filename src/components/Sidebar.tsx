@@ -1,17 +1,17 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import type { Employee } from '../types'
-import { getDepartmentColor } from '../data'
 import { EmployeeChip } from './EmployeeChip'
 import { HiSearch, HiUserGroup } from 'react-icons/hi'
 
 interface SidebarProps {
   unassigned: Employee[]
+  getDepartmentColor: (department: string) => string
   onReset: () => void
   onClear: () => void
 }
 
-export function Sidebar({ unassigned, onReset, onClear }: SidebarProps) {
+export function Sidebar({ unassigned, getDepartmentColor, onReset, onClear }: SidebarProps) {
   const [search, setSearch] = useState('')
   const [filterDept, setFilterDept] = useState<string>('')
 
@@ -93,7 +93,7 @@ export function Sidebar({ unassigned, onReset, onClear }: SidebarProps) {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
                 >
-                  <EmployeeChip employee={emp} sourceDeskId={null} size="sm" />
+                  <EmployeeChip employee={emp} getDepartmentColor={getDepartmentColor} sourceDeskId={null} size="sm" />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-800 truncate">
                       {emp.name}

@@ -9,6 +9,7 @@ interface ZoneSectionProps {
   unavailableDesks: UnavailableDeskMap
   pinnedDesks: PinnedDeskMap
   getEmployee: (deskId: string) => Employee | null
+  getDepartmentColor: (department: string) => string
   onDrop: (deskId: string, employeeId: string, sourceDeskId: string | null) => void
   onRemove: (deskId: string) => void
   onDeskNameChange: (deskId: string, name: string) => void
@@ -23,6 +24,7 @@ export function ZoneSection({
   unavailableDesks,
   pinnedDesks,
   getEmployee,
+  getDepartmentColor,
   onDrop,
   onRemove,
   onDeskNameChange,
@@ -50,6 +52,7 @@ export function ZoneSection({
             key={desk.id}
             desk={desk}
             employee={getEmployee(desk.id)}
+            getDepartmentColor={getDepartmentColor}
             name={deskNames[desk.id]}
             unavailable={!!unavailableDesks[desk.id]}
             pinned={!!pinnedDesks[desk.id]}

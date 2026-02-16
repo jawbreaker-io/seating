@@ -9,7 +9,7 @@ import {
   validateSeating,
 } from '../shareUtils'
 import type { SharePayload } from '../shareUtils'
-import { defaultSeating, desks, zones } from '../data'
+import { defaultSeating, desks, zones, employees } from '../data'
 import type { SeatingMap } from '../types'
 
 describe('encodeSeating / decodeSeating', () => {
@@ -186,7 +186,7 @@ describe('validateSeating', () => {
   })
 
   it('strips unknown employee IDs', () => {
-    const result = validateSeating({ 'z1-d0': 'e1', 'z1-d1': 'fake-emp' })
+    const result = validateSeating({ 'z1-d0': 'e1', 'z1-d1': 'fake-emp' }, desks, employees)
     expect(result['z1-d0']).toBe('e1')
     expect(result['z1-d1']).toBeNull()
   })

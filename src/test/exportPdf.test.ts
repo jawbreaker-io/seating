@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { exportSeatingPdf } from '../shareUtils'
 import type { PdfExportData } from '../shareUtils'
-import { employees, zones, desks, defaultSeating } from '../data'
+import { employees, zones, desks, defaultSeating, DEFAULT_DEPARTMENT_COLORS } from '../data'
 import type { Zone } from '../types'
 
 // Mock jsPDF so we can verify the correct methods are called without generating real PDFs
@@ -42,6 +42,8 @@ function buildData(overrides?: Partial<PdfExportData>): PdfExportData {
     desks,
     deskNames: {},
     unavailableDesks: {},
+    employees,
+    departmentColors: DEFAULT_DEPARTMENT_COLORS,
     ...overrides,
   }
 }

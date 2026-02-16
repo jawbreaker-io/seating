@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from 'react'
-import type { Desk, SeatingMap, PinnedDeskMap } from './types'
-import { defaultSeating, employees } from './data'
+import type { Desk, Employee, SeatingMap, PinnedDeskMap } from './types'
+import { defaultSeating } from './data'
 
 const STORAGE_KEY = 'seating-chart-assignments'
 const PINNED_STORAGE_KEY = 'seating-chart-pinned'
@@ -33,7 +33,7 @@ function savePinnedDesks(pinned: PinnedDeskMap) {
   localStorage.setItem(PINNED_STORAGE_KEY, JSON.stringify(pinned))
 }
 
-export function useSeatingStore(desks: Desk[]) {
+export function useSeatingStore(desks: Desk[], employees: Employee[]) {
   const [seating, setSeating] = useState<SeatingMap>(loadSeating)
   const [pinnedDesks, setPinnedDesks] = useState<PinnedDeskMap>(loadPinnedDesks)
 
@@ -122,7 +122,7 @@ export function useSeatingStore(desks: Desk[]) {
         .map(([, empId]) => empId),
     )
     return employees.filter((e) => !assignedIds.has(e.id))
-  }, [seating, validDeskIds])
+  }, [seating, validDeskIds, employees])
 
   const getEmployeeForDesk = useCallback(
     (deskId: string) => {
@@ -130,7 +130,7 @@ export function useSeatingStore(desks: Desk[]) {
       if (!empId) return null
       return employees.find((e) => e.id === empId) ?? null
     },
-    [seating],
+    [seating, employees],
   )
 
   const getDeskForEmployee = useCallback(

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useSeatingStore } from '../useSeatingStore'
-import { desks } from '../data'
+import { desks, employees } from '../data'
 
 describe('useSeatingStore pinning', () => {
   beforeEach(() => {
@@ -9,12 +9,12 @@ describe('useSeatingStore pinning', () => {
   })
 
   it('initializes with no pinned desks', () => {
-    const { result } = renderHook(() => useSeatingStore(desks))
+    const { result } = renderHook(() => useSeatingStore(desks, employees))
     expect(Object.keys(result.current.pinnedDesks)).toHaveLength(0)
   })
 
   it('togglePin pins an occupied desk', () => {
-    const { result } = renderHook(() => useSeatingStore(desks))
+    const { result } = renderHook(() => useSeatingStore(desks, employees))
     const deskId = 'z1-d0'
     expect(result.current.seating[deskId]).toBeTruthy()
 
@@ -26,7 +26,7 @@ describe('useSeatingStore pinning', () => {
   })
 
   it('togglePin unpins a pinned desk', () => {
-    const { result } = renderHook(() => useSeatingStore(desks))
+    const { result } = renderHook(() => useSeatingStore(desks, employees))
     const deskId = 'z1-d0'
 
     act(() => {
@@ -41,7 +41,7 @@ describe('useSeatingStore pinning', () => {
   })
 
   it('persists pinned desks to localStorage', () => {
-    const { result } = renderHook(() => useSeatingStore(desks))
+    const { result } = renderHook(() => useSeatingStore(desks, employees))
 
     act(() => {
       result.current.togglePin('z1-d0')
@@ -52,7 +52,7 @@ describe('useSeatingStore pinning', () => {
   })
 
   it('prevents unassign on pinned desk', () => {
-    const { result } = renderHook(() => useSeatingStore(desks))
+    const { result } = renderHook(() => useSeatingStore(desks, employees))
     const deskId = 'z1-d0'
     const empId = result.current.seating[deskId]
 
@@ -69,7 +69,7 @@ describe('useSeatingStore pinning', () => {
   })
 
   it('prevents drop onto pinned desk', () => {
-    const { result } = renderHook(() => useSeatingStore(desks))
+    const { result } = renderHook(() => useSeatingStore(desks, employees))
     const pinnedDesk = 'z1-d0'
     const originalEmp = result.current.seating[pinnedDesk]
 
@@ -88,7 +88,7 @@ describe('useSeatingStore pinning', () => {
   })
 
   it('prevents move from pinned desk', () => {
-    const { result } = renderHook(() => useSeatingStore(desks))
+    const { result } = renderHook(() => useSeatingStore(desks, employees))
     const pinnedDesk = 'z1-d0'
     const originalEmp = result.current.seating[pinnedDesk]!
     const emptyDesk = desks.find((d) => !result.current.seating[d.id])!
@@ -107,7 +107,7 @@ describe('useSeatingStore pinning', () => {
   })
 
   it('clearAll keeps pinned employees in place', () => {
-    const { result } = renderHook(() => useSeatingStore(desks))
+    const { result } = renderHook(() => useSeatingStore(desks, employees))
     const deskId = 'z1-d0'
     const empId = result.current.seating[deskId]
 
@@ -127,7 +127,7 @@ describe('useSeatingStore pinning', () => {
   })
 
   it('loadSharedPins sets pinned desks', () => {
-    const { result } = renderHook(() => useSeatingStore(desks))
+    const { result } = renderHook(() => useSeatingStore(desks, employees))
 
     act(() => {
       result.current.loadSharedPins({ 'z1-d0': true, 'z2-d0': true })
