@@ -12,6 +12,7 @@ import { OptimizePanel } from './components/OptimizePanel'
 import { PeopleEditor } from './components/PeopleEditor'
 import { getSharedData } from './shareUtils'
 import type { SharePayload } from './shareUtils'
+import { useDefaultLayout } from './useDefaultLayout'
 
 function App() {
   const {
@@ -97,6 +98,9 @@ function App() {
       window.history.replaceState(null, '', window.location.pathname)
     }
   }, [loadSharePayload])
+
+  // On first visit with no saved data, load /default-layout.json if mounted
+  useDefaultLayout(loadSharePayload)
 
   // When a desk is marked unavailable, unassign any employee sitting there
   const handleToggleDeskUnavailable = useCallback(

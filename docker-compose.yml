@@ -6,6 +6,10 @@ services:
     image: seating-app:latest
     ports:
       - "8080:8080"
+    # To set a default layout for new visitors, export a JSON file from the app
+    # and mount it here. See README.md for details.
+    # volumes:
+    #   - ./default-layout.json:/usr/share/nginx/html/default-layout.json:ro
     restart: unless-stopped
     deploy:
       resources:
