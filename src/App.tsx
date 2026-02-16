@@ -3,11 +3,13 @@ import { AnimatePresence } from 'motion/react'
 import { DragProvider } from './DragContext'
 import { useLayoutStore } from './useLayoutStore'
 import { useSeatingStore } from './useSeatingStore'
+import { usePeopleStore } from './usePeopleStore'
 import { Header } from './components/Header'
 import { FloorPlan } from './components/FloorPlan'
 import { Sidebar } from './components/Sidebar'
 import { LayoutEditor } from './components/LayoutEditor'
 import { OptimizePanel } from './components/OptimizePanel'
+import { PeopleEditor } from './components/PeopleEditor'
 import { getSharedData } from './shareUtils'
 
 function App() {
@@ -26,6 +28,22 @@ function App() {
   } = useLayoutStore()
 
   const {
+    employees,
+    departmentColors,
+    departments,
+    getDepartmentColor,
+    addEmployee,
+    updateEmployee,
+    removeEmployee,
+    setDepartmentColor,
+    addDepartment,
+    renameDepartment,
+    removeDepartment,
+    resetPeople,
+    loadSharedPeople,
+  } = usePeopleStore()
+
+  const {
     seating,
     pinnedDesks,
     assignEmployee,
@@ -37,10 +55,11 @@ function App() {
     loadSharedPins,
     unassignedEmployees,
     getEmployeeForDesk,
-  } = useSeatingStore(desks)
+  } = useSeatingStore(desks, employees)
 
   const [showLayoutEditor, setShowLayoutEditor] = useState(false)
   const [showOptimizer, setShowOptimizer] = useState(false)
+  const [showPeopleEditor, setShowPeopleEditor] = useState(false)
 
   const loadedRef = useRef(false)
   useEffect(() => {
@@ -62,11 +81,14 @@ function App() {
         if (shared.pinnedDesks) {
           loadSharedPins(shared.pinnedDesks)
         }
+        if (shared.employees && shared.departmentColors) {
+          loadSharedPeople(shared.employees, shared.departmentColors)
+        }
       }
       // Clear the hash regardless so subsequent reloads use localStorage
       window.history.replaceState(null, '', window.location.pathname)
     }
-  }, [loadShared, loadSharedLayout, loadSharedPins])
+  }, [loadShared, loadSharedLayout, loadSharedPins, loadSharedPeople])
 
   // When a desk is marked unavailable, unassign any employee sitting there
   const handleToggleDeskUnavailable = useCallback(
@@ -89,8 +111,11 @@ function App() {
           deskNames={deskNames}
           unavailableDesks={unavailableDesks}
           pinnedDesks={pinnedDesks}
+          employees={employees}
+          departmentColors={departmentColors}
           onImport={loadShared}
           onEditLayout={() => setShowLayoutEditor(true)}
+          onEditPeople={() => setShowPeopleEditor(true)}
           onOptimize={() => setShowOptimizer(true)}
         />
         <div className="flex flex-1 overflow-hidden">
@@ -101,6 +126,7 @@ function App() {
             unavailableDesks={unavailableDesks}
             pinnedDesks={pinnedDesks}
             getEmployee={getEmployeeForDesk}
+            getDepartmentColor={getDepartmentColor}
             onDrop={assignEmployee}
             onRemove={unassignEmployee}
             onDeskNameChange={setDeskName}
@@ -109,6 +135,7 @@ function App() {
           />
           <Sidebar
             unassigned={unassignedEmployees}
+            getDepartmentColor={getDepartmentColor}
             onReset={resetSeating}
             onClear={clearAll}
           />
@@ -133,8 +160,28 @@ function App() {
             desks={desks}
             pinnedDesks={pinnedDesks}
             unavailableDesks={unavailableDesks}
+            employees={employees}
             onApply={loadShared}
             onClose={() => setShowOptimizer(false)}
+          />
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {showPeopleEditor && (
+          <PeopleEditor
+            employees={employees}
+            departments={departments}
+            departmentColors={departmentColors}
+            getDepartmentColor={getDepartmentColor}
+            onAddEmployee={addEmployee}
+            onUpdateEmployee={updateEmployee}
+            onRemoveEmployee={removeEmployee}
+            onAddDepartment={addDepartment}
+            onRenameDepartment={renameDepartment}
+            onSetDepartmentColor={setDepartmentColor}
+            onRemoveDepartment={removeDepartment}
+            onResetPeople={resetPeople}
+            onClose={() => setShowPeopleEditor(false)}
           />
         )}
       </AnimatePresence>

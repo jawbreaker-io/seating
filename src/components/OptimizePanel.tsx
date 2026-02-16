@@ -1,9 +1,9 @@
 import { useState, useMemo, useCallback } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { HiSparkles, HiSwitchHorizontal, HiLightningBolt, HiCheck } from 'react-icons/hi'
-import type { Desk, SeatingMap, PinnedDeskMap, UnavailableDeskMap, OptimizationMode, OptimizationResult } from '../types'
+import type { Desk, Employee, SeatingMap, PinnedDeskMap, UnavailableDeskMap, OptimizationMode, OptimizationResult } from '../types'
 import { optimizeSeating } from '../optimizer'
-import { employees, getDepartmentColor } from '../data'
+import { getDepartmentColor } from '../data'
 
 // Pre-computed particle positions for celebration effect (deterministic per index)
 const PARTICLE_POSITIONS = Array.from({ length: 20 }, (_, i) => {
@@ -21,26 +21,28 @@ interface OptimizePanelProps {
   desks: Desk[]
   pinnedDesks: PinnedDeskMap
   unavailableDesks: UnavailableDeskMap
+  employees: Employee[]
   onApply: (seating: SeatingMap) => void
   onClose: () => void
 }
-
-const employeeMap = new Map(employees.map((e) => [e.id, e]))
 
 export function OptimizePanel({
   seating,
   desks,
   pinnedDesks,
   unavailableDesks,
+  employees,
   onApply,
   onClose,
 }: OptimizePanelProps) {
   const [mode, setMode] = useState<OptimizationMode>('minimize-moves')
   const [applied, setApplied] = useState(false)
 
+  const employeeMap = useMemo(() => new Map(employees.map((e) => [e.id, e])), [employees])
+
   const result: OptimizationResult = useMemo(
-    () => optimizeSeating(seating, desks, pinnedDesks, unavailableDesks, mode),
-    [seating, desks, pinnedDesks, unavailableDesks, mode],
+    () => optimizeSeating(seating, desks, pinnedDesks, unavailableDesks, mode, employees),
+    [seating, desks, pinnedDesks, unavailableDesks, mode, employees],
   )
 
   const movedEmployees = useMemo(() => {

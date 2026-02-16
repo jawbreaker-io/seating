@@ -1,10 +1,10 @@
 import { motion } from 'motion/react'
 import type { Employee } from '../types'
-import { getDepartmentColor } from '../data'
 import { useDragContext } from '../useDragContext'
 
 interface EmployeeChipProps {
   employee: Employee
+  getDepartmentColor: (department: string) => string
   sourceDeskId: string | null
   size?: 'sm' | 'md'
   pinned?: boolean
@@ -13,6 +13,7 @@ interface EmployeeChipProps {
 
 export function EmployeeChip({
   employee,
+  getDepartmentColor,
   sourceDeskId,
   size = 'md',
   pinned = false,

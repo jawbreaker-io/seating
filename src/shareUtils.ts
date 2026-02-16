@@ -1,8 +1,6 @@
 import { jsPDF } from 'jspdf'
-import type { Desk, Zone, SeatingMap, DeskNameMap, UnavailableDeskMap, PinnedDeskMap } from './types'
-import { desks as defaultDesks, employees, generateDesks, getDepartmentColor } from './data'
-
-const validEmployeeIds = new Set(employees.map((e) => e.id))
+import type { Desk, Employee, Zone, SeatingMap, DeskNameMap, UnavailableDeskMap, PinnedDeskMap } from './types'
+import { desks as defaultDesks, generateDesks, getDepartmentColor } from './data'
 
 /** Data included in a shareable link. */
 export interface SharePayload {
@@ -11,6 +9,8 @@ export interface SharePayload {
   deskNames: DeskNameMap
   unavailableDesks: UnavailableDeskMap
   pinnedDesks?: PinnedDeskMap
+  employees?: Employee[]
+  departmentColors?: Record<string, string>
 }
 
 /**
@@ -20,8 +20,10 @@ export interface SharePayload {
 export function validateSeating(
   raw: Record<string, unknown>,
   desks: Desk[] = defaultDesks,
+  employees?: Employee[],
 ): SeatingMap {
   const validDeskIds = new Set(desks.map((d) => d.id))
+  const validEmployeeIds = employees ? new Set(employees.map((e) => e.id)) : null
   const seating: SeatingMap = {}
   for (const desk of desks) {
     seating[desk.id] = null
@@ -30,7 +32,7 @@ export function validateSeating(
     if (
       validDeskIds.has(deskId) &&
       typeof empId === 'string' &&
-      validEmployeeIds.has(empId)
+      (!validEmployeeIds || validEmployeeIds.has(empId))
     ) {
       seating[deskId] = empId
     }
@@ -82,7 +84,7 @@ export function decodeSeating(
 }
 
 /**
- * Encode a full share payload (zones + seating + desk names + unavailable desks)
+ * Encode a full share payload (zones + seating + desk names + unavailable desks + employees + dept colors)
  * into a compact URL-safe base64url string.
  */
 export function encodeSharePayload(payload: SharePayload): string {
@@ -100,6 +102,12 @@ export function encodeSharePayload(payload: SharePayload): string {
   }
   if (payload.pinnedDesks && Object.keys(payload.pinnedDesks).length > 0) {
     compact.p = payload.pinnedDesks
+  }
+  if (payload.employees && payload.employees.length > 0) {
+    compact.e = payload.employees
+  }
+  if (payload.departmentColors && Object.keys(payload.departmentColors).length > 0) {
+    compact.dc = payload.departmentColors
   }
   const json = JSON.stringify(compact)
   return btoa(json).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
@@ -124,11 +132,13 @@ export function decodeSharePayload(
       const parsed = JSON.parse(decoded)
       const zones: Zone[] = parsed.z ?? []
       const generatedDesks = zones.length > 0 ? generateDesks(zones) : desks
-      const seating = validateSeating(parsed.s ?? {}, generatedDesks)
+      const sharedEmployees: Employee[] | undefined = parsed.e
+      const departmentColors: Record<string, string> | undefined = parsed.dc
+      const seating = validateSeating(parsed.s ?? {}, generatedDesks, sharedEmployees)
       const deskNames: DeskNameMap = parsed.n ?? {}
       const unavailableDesks: UnavailableDeskMap = parsed.u ?? {}
       const pinnedDesks: PinnedDeskMap = parsed.p ?? {}
-      return { zones, seating, deskNames, unavailableDesks, pinnedDesks }
+      return { zones, seating, deskNames, unavailableDesks, pinnedDesks, employees: sharedEmployees, departmentColors }
     }
 
     // Legacy format: comma-separated deskId:empId pairs
@@ -208,6 +218,8 @@ export interface PdfExportData {
   desks: Desk[]
   deskNames: DeskNameMap
   unavailableDesks: UnavailableDeskMap
+  employees: Employee[]
+  departmentColors: Record<string, string>
 }
 
 function hexToRgb(hex: string): [number, number, number] {
@@ -221,8 +233,9 @@ function hexToRgb(hex: string): [number, number, number] {
 
 /** Export the seating arrangement as a downloadable PDF file. */
 export function exportSeatingPdf(data: PdfExportData) {
-  const { seating, zones, desks, deskNames, unavailableDesks } = data
+  const { seating, zones, desks, deskNames, unavailableDesks, employees, departmentColors } = data
   const employeeMap = new Map(employees.map((e) => [e.id, e]))
+  const getColor = (dept: string) => getDepartmentColor(dept, departmentColors)
 
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
   const pageWidth = 210
@@ -324,7 +337,7 @@ export function exportSeatingPdf(data: PdfExportData) {
         doc.text('N/A', cx + cellW / 2, cy + cellH / 2 + 1, { align: 'center' })
       } else if (emp) {
         // Department color bar
-        const deptColor = hexToRgb(getDepartmentColor(emp.department))
+        const deptColor = hexToRgb(getColor(emp.department))
         doc.setFillColor(deptColor[0], deptColor[1], deptColor[2])
         doc.rect(cx, cy, cellW, 2.5, 'F')
 
@@ -409,7 +422,7 @@ export function exportSeatingPdf(data: PdfExportData) {
     doc.text(emp.name, colX[0] + 2, y)
 
     // Department with color indicator
-    const deptColor = hexToRgb(getDepartmentColor(emp.department))
+    const deptColor = hexToRgb(getColor(emp.department))
     doc.setFillColor(deptColor[0], deptColor[1], deptColor[2])
     doc.circle(colX[1] + 3.5, y - 1.2, 1.2, 'F')
     doc.text(emp.department, colX[1] + 6.5, y)

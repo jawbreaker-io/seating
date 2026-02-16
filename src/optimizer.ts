@@ -1,14 +1,12 @@
-import type { Desk, SeatingMap, PinnedDeskMap, UnavailableDeskMap, OptimizationMode, OptimizationResult } from './types'
-import { employees } from './data'
-
-const employeeMap = new Map(employees.map((e) => [e.id, e]))
+import type { Desk, Employee, SeatingMap, PinnedDeskMap, UnavailableDeskMap, OptimizationMode, OptimizationResult } from './types'
 
 /**
  * Calculate a clustering score for a seating arrangement.
  * Higher score = better department clustering.
  * For each seated employee, count how many neighbors (same zone) share the same department.
  */
-export function clusterScore(seating: SeatingMap, desks: Desk[]): number {
+export function clusterScore(seating: SeatingMap, desks: Desk[], employees: Employee[]): number {
+  const employeeMap = new Map(employees.map((e) => [e.id, e]))
   const deskById = new Map(desks.map((d) => [d.id, d]))
   const zoneDesks = new Map<string, Desk[]>()
   for (const d of desks) {
@@ -81,7 +79,9 @@ function optimizeFull(
   desks: Desk[],
   pinnedDesks: PinnedDeskMap,
   unavailableDesks: UnavailableDeskMap,
+  employees: Employee[],
 ): SeatingMap {
+  const employeeMap = new Map(employees.map((e) => [e.id, e]))
   const result: SeatingMap = {}
   for (const d of desks) {
     result[d.id] = null
@@ -194,7 +194,7 @@ function optimizeFull(
     .filter((d) => !pinnedDesks[d.id] && !unavailableDesks[d.id])
     .map((d) => d.id)
 
-  return refineBySwapping(result, desks, movableDeskIds, 200)
+  return refineBySwapping(result, desks, movableDeskIds, 200, employees)
 }
 
 /**
@@ -207,6 +207,7 @@ function refineBySwapping(
   desks: Desk[],
   movableDeskIds: string[],
   maxIterations: number,
+  employees: Employee[],
 ): SeatingMap {
   const result = { ...seating }
 
@@ -232,13 +233,13 @@ function refineBySwapping(
         if (empA === empB) continue
 
         // Calculate score before swap
-        const scoreBefore = clusterScore(result, desks)
+        const scoreBefore = clusterScore(result, desks, employees)
 
         // Perform swap temporarily
         result[deskA] = empB
         result[deskB] = empA
 
-        const scoreAfter = clusterScore(result, desks)
+        const scoreAfter = clusterScore(result, desks, employees)
         const gain = scoreAfter - scoreBefore
 
         // Revert swap
@@ -274,12 +275,13 @@ function optimizeMinimizeMoves(
   desks: Desk[],
   pinnedDesks: PinnedDeskMap,
   unavailableDesks: UnavailableDeskMap,
+  employees: Employee[],
 ): SeatingMap {
   const movableDeskIds = desks
     .filter((d) => !pinnedDesks[d.id] && !unavailableDesks[d.id])
     .map((d) => d.id)
 
-  return refineBySwapping(currentSeating, desks, movableDeskIds, 200)
+  return refineBySwapping(currentSeating, desks, movableDeskIds, 200, employees)
 }
 
 /**
@@ -291,18 +293,19 @@ export function optimizeSeating(
   pinnedDesks: PinnedDeskMap,
   unavailableDesks: UnavailableDeskMap,
   mode: OptimizationMode,
+  employees: Employee[],
 ): OptimizationResult {
-  const previousScore = clusterScore(currentSeating, desks)
+  const previousScore = clusterScore(currentSeating, desks, employees)
 
   const optimized =
     mode === 'full'
-      ? optimizeFull(currentSeating, desks, pinnedDesks, unavailableDesks)
-      : optimizeMinimizeMoves(currentSeating, desks, pinnedDesks, unavailableDesks)
+      ? optimizeFull(currentSeating, desks, pinnedDesks, unavailableDesks, employees)
+      : optimizeMinimizeMoves(currentSeating, desks, pinnedDesks, unavailableDesks, employees)
 
   return {
     seating: optimized,
     moves: countMoves(currentSeating, optimized),
-    clusterScore: clusterScore(optimized, desks),
+    clusterScore: clusterScore(optimized, desks, employees),
     previousScore,
   }
 }

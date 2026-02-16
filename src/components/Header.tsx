@@ -1,7 +1,6 @@
 import { motion } from 'motion/react'
-import { HiOfficeBuilding, HiPencil, HiSparkles } from 'react-icons/hi'
-import { employees } from '../data'
-import type { Desk, Zone, SeatingMap, DeskNameMap, UnavailableDeskMap, PinnedDeskMap } from '../types'
+import { HiOfficeBuilding, HiPencil, HiSparkles, HiUserGroup } from 'react-icons/hi'
+import type { Desk, Employee, Zone, SeatingMap, DeskNameMap, UnavailableDeskMap, PinnedDeskMap } from '../types'
 import { SharePanel } from './SharePanel'
 
 interface HeaderProps {
@@ -11,12 +10,15 @@ interface HeaderProps {
   deskNames: DeskNameMap
   unavailableDesks: UnavailableDeskMap
   pinnedDesks: PinnedDeskMap
+  employees: Employee[]
+  departmentColors: Record<string, string>
   onImport: (seating: SeatingMap) => void
   onEditLayout: () => void
+  onEditPeople: () => void
   onOptimize: () => void
 }
 
-export function Header({ seating, zones, desks, deskNames, unavailableDesks, pinnedDesks, onImport, onEditLayout, onOptimize }: HeaderProps) {
+export function Header({ seating, zones, desks, deskNames, unavailableDesks, pinnedDesks, employees, departmentColors, onImport, onEditLayout, onEditPeople, onOptimize }: HeaderProps) {
   const assigned = Object.values(seating).filter(Boolean).length
   const totalDesks = desks.length
   const unavailableCount = Object.keys(unavailableDesks).length
@@ -77,6 +79,14 @@ export function Header({ seating, zones, desks, deskNames, unavailableDesks, pin
           Optimize
         </button>
         <button
+          data-testid="edit-people-btn"
+          onClick={onEditPeople}
+          className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition-colors font-medium"
+        >
+          <HiUserGroup className="text-sm" />
+          Edit People
+        </button>
+        <button
           data-testid="edit-layout-btn"
           onClick={onEditLayout}
           className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
@@ -84,7 +94,7 @@ export function Header({ seating, zones, desks, deskNames, unavailableDesks, pin
           <HiPencil className="text-sm" />
           Edit Layout
         </button>
-        <SharePanel seating={seating} zones={zones} desks={desks} deskNames={deskNames} unavailableDesks={unavailableDesks} pinnedDesks={pinnedDesks} onImport={onImport} />
+        <SharePanel seating={seating} zones={zones} desks={desks} deskNames={deskNames} unavailableDesks={unavailableDesks} pinnedDesks={pinnedDesks} employees={employees} departmentColors={departmentColors} onImport={onImport} />
       </div>
     </header>
   )

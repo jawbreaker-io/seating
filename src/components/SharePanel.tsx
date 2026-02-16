@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { HiShare, HiLink, HiDownload, HiUpload } from 'react-icons/hi'
 import { HiDocumentText } from 'react-icons/hi'
-import type { Desk, Zone, SeatingMap, DeskNameMap, UnavailableDeskMap, PinnedDeskMap } from '../types'
+import type { Desk, Employee, Zone, SeatingMap, DeskNameMap, UnavailableDeskMap, PinnedDeskMap } from '../types'
 import { buildShareUrl, exportSeatingJson, exportSeatingPdf, importSeatingJson } from '../shareUtils'
 
 interface SharePanelProps {
@@ -12,10 +12,12 @@ interface SharePanelProps {
   deskNames: DeskNameMap
   unavailableDesks: UnavailableDeskMap
   pinnedDesks: PinnedDeskMap
+  employees: Employee[]
+  departmentColors: Record<string, string>
   onImport: (seating: SeatingMap) => void
 }
 
-export function SharePanel({ seating, zones, desks, deskNames, unavailableDesks, pinnedDesks, onImport }: SharePanelProps) {
+export function SharePanel({ seating, zones, desks, deskNames, unavailableDesks, pinnedDesks, employees, departmentColors, onImport }: SharePanelProps) {
   const [open, setOpen] = useState(false)
   const [copied, setCopied] = useState(false)
   const panelRef = useRef<HTMLDivElement>(null)
@@ -33,7 +35,7 @@ export function SharePanel({ seating, zones, desks, deskNames, unavailableDesks,
   }, [open])
 
   const handleCopyLink = async () => {
-    const url = buildShareUrl({ zones, seating, deskNames, unavailableDesks, pinnedDesks })
+    const url = buildShareUrl({ zones, seating, deskNames, unavailableDesks, pinnedDesks, employees, departmentColors })
     try {
       await navigator.clipboard.writeText(url)
     } catch {
@@ -56,7 +58,7 @@ export function SharePanel({ seating, zones, desks, deskNames, unavailableDesks,
   }
 
   const handleExportPdf = () => {
-    exportSeatingPdf({ seating, zones, desks, deskNames, unavailableDesks })
+    exportSeatingPdf({ seating, zones, desks, deskNames, unavailableDesks, employees, departmentColors })
   }
 
   const handleImport = async () => {

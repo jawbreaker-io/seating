@@ -9,6 +9,7 @@ import type { DragItem } from '../types'
 interface DeskSlotProps {
   desk: Desk
   employee: Employee | null
+  getDepartmentColor: (department: string) => string
   name?: string
   unavailable?: boolean
   pinned?: boolean
@@ -22,6 +23,7 @@ interface DeskSlotProps {
 export function DeskSlot({
   desk,
   employee,
+  getDepartmentColor,
   name,
   unavailable = false,
   pinned = false,
@@ -198,6 +200,7 @@ export function DeskSlot({
           <EmployeeChip
             key={employee.id}
             employee={employee}
+            getDepartmentColor={getDepartmentColor}
             sourceDeskId={desk.id}
             size="sm"
             pinned={pinned}
