@@ -69,9 +69,7 @@ function App() {
         loadSharedLayout(shared.zones, shared.deskNames, shared.unavailableDesks)
       }
       loadShared(shared.seating)
-      if (shared.pinnedDesks) {
-        loadSharedPins(shared.pinnedDesks)
-      }
+      loadSharedPins(shared.pinnedDesks ?? {})
       if (shared.employees && shared.departmentColors) {
         loadSharedPeople(shared.employees, shared.departmentColors)
       }

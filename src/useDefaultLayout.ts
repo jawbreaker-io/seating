@@ -3,6 +3,32 @@ import { parseJsonConfig } from './shareUtils'
 import type { SharePayload } from './shareUtils'
 
 const HAS_USER_DATA_KEY = 'seating-chart-assignments'
+const STORAGE_PREFIX = 'seating-chart-'
+
+/**
+ * Remove all app-owned localStorage keys and clear browser Cache Storage.
+ */
+async function clearAppStorage(): Promise<void> {
+  // Remove all seating-chart-* keys from localStorage
+  const keys = []
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i)
+    if (key?.startsWith(STORAGE_PREFIX)) keys.push(key)
+  }
+  for (const key of keys) {
+    localStorage.removeItem(key)
+  }
+
+  // Clear Cache Storage (service-worker / browser caches)
+  if (typeof caches !== 'undefined') {
+    try {
+      const names = await caches.keys()
+      await Promise.all(names.map((n) => caches.delete(n)))
+    } catch {
+      // Cache API may not be available in all contexts
+    }
+  }
+}
 
 /**
  * Fetch and parse /default-layout.json.
@@ -51,6 +77,7 @@ export function useDefaultLayout(
   }, [onLoad])
 
   const resetToDefault = useCallback(async () => {
+    await clearAppStorage()
     const payload = await fetchDefaultLayout()
     if (payload) {
       onLoad(payload)
