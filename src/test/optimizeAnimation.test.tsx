@@ -1,31 +1,29 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, act } from '@testing-library/react'
+import React, { useEffect, createElement, Fragment } from 'react'
 import type { AnimationMove } from '../components/OptimizeAnimation'
 import type { Employee } from '../types'
 
+const MOTION_PROPS = new Set([
+  'initial', 'animate', 'exit', 'transition',
+  'whileHover', 'whileDrag', 'layout', 'layoutId', 'ref',
+])
+
+// Hoist React reference so vi.mock factory can use it
+const hoisted = vi.hoisted(() => ({ React: null as typeof React | null }))
+hoisted.React = React
+
 // Mock motion/react before importing the component
 vi.mock('motion/react', () => {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const React = require('react')
+  const R = hoisted.React!
 
   function createMotionComponent(tag: string) {
-    return React.forwardRef(function MotionMock(props: Record<string, unknown>, ref: unknown) {
+    return function MotionMock(props: Record<string, unknown>) {
       const filteredProps: Record<string, unknown> = {}
       let onComplete: (() => void) | null = null
 
       for (const [key, value] of Object.entries(props)) {
-        if (
-          key === 'initial' ||
-          key === 'animate' ||
-          key === 'exit' ||
-          key === 'transition' ||
-          key === 'whileHover' ||
-          key === 'whileDrag' ||
-          key === 'layout' ||
-          key === 'layoutId'
-        ) {
-          continue
-        }
+        if (MOTION_PROPS.has(key)) continue
         if (key === 'onAnimationComplete') {
           onComplete = value as () => void
           continue
@@ -33,15 +31,15 @@ vi.mock('motion/react', () => {
         filteredProps[key] = value
       }
 
-      React.useEffect(() => {
+      R.useEffect(() => {
         if (onComplete) {
           const timer = setTimeout(onComplete, 5)
           return () => clearTimeout(timer)
         }
-      }, []) // eslint-disable-line react-hooks/exhaustive-deps
+      }, [])
 
-      return React.createElement(tag, { ...filteredProps, ref })
-    })
+      return R.createElement(tag, filteredProps)
+    }
   }
 
   const motion = new Proxy(
@@ -54,12 +52,18 @@ vi.mock('motion/react', () => {
   return {
     motion,
     AnimatePresence: ({ children }: { children: React.ReactNode }) =>
-      React.createElement(React.Fragment, null, children),
+      R.createElement(R.Fragment, null, children),
   }
 })
 
 // Import the component AFTER the mock
 const { OptimizeAnimation } = await import('../components/OptimizeAnimation')
+
+// Suppress unused import warnings — these are needed at the module level
+// so hoisted.React has a value before vi.mock runs
+void useEffect
+void createElement
+void Fragment
 
 const testEmployees: Employee[] = [
   { id: 'e1', name: 'Alice Chen', department: 'Engineering', avatar: 'AC' },
