@@ -189,30 +189,29 @@ function optimizeFull(
     }
   }
 
-  return result
-}
-
-/**
- * Minimize-moves optimization: iteratively swap employees to improve clustering
- * while keeping the total number of moves low.
- * Uses a greedy approach: find the best swap, apply it, repeat.
- */
-function optimizeMinimizeMoves(
-  currentSeating: SeatingMap,
-  desks: Desk[],
-  pinnedDesks: PinnedDeskMap,
-  unavailableDesks: UnavailableDeskMap,
-): SeatingMap {
-  const result = { ...currentSeating }
-
-  // Get movable desk IDs (not pinned, not unavailable)
+  // Refine the initial placement with greedy swaps to maximize adjacency score
   const movableDeskIds = desks
     .filter((d) => !pinnedDesks[d.id] && !unavailableDesks[d.id])
     .map((d) => d.id)
 
+  return refineBySwapping(result, desks, movableDeskIds, 200)
+}
+
+/**
+ * Greedy swap refinement: iteratively find the best pair swap that improves
+ * the clustering score, and apply it. Repeat until no improvement is found
+ * or maxIterations is reached.
+ */
+function refineBySwapping(
+  seating: SeatingMap,
+  desks: Desk[],
+  movableDeskIds: string[],
+  maxIterations: number,
+): SeatingMap {
+  const result = { ...seating }
+
   let improved = true
   let iterations = 0
-  const maxIterations = 200
 
   while (improved && iterations < maxIterations) {
     improved = false
@@ -263,6 +262,24 @@ function optimizeMinimizeMoves(
   }
 
   return result
+}
+
+/**
+ * Minimize-moves optimization: iteratively swap employees to improve clustering
+ * while keeping the total number of moves low.
+ * Uses a greedy approach: find the best swap, apply it, repeat.
+ */
+function optimizeMinimizeMoves(
+  currentSeating: SeatingMap,
+  desks: Desk[],
+  pinnedDesks: PinnedDeskMap,
+  unavailableDesks: UnavailableDeskMap,
+): SeatingMap {
+  const movableDeskIds = desks
+    .filter((d) => !pinnedDesks[d.id] && !unavailableDesks[d.id])
+    .map((d) => d.id)
+
+  return refineBySwapping(currentSeating, desks, movableDeskIds, 200)
 }
 
 /**

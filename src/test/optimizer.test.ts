@@ -120,7 +120,13 @@ describe('optimizeSeating', () => {
     })
   })
 
-  describe('minimize-moves mode', () => {
+  it('full mode scores at least as high as minimize-moves mode', () => {
+      const fullResult = optimizeSeating(defaultSeating, desks, noPins, noUnavailable, 'full')
+      const minResult = optimizeSeating(defaultSeating, desks, noPins, noUnavailable, 'minimize-moves')
+      expect(fullResult.clusterScore).toBeGreaterThanOrEqual(minResult.clusterScore)
+    })
+
+    describe('minimize-moves mode', () => {
     it('produces a valid seating map with all currently-assigned employees', () => {
       const result = optimizeSeating(defaultSeating, desks, noPins, noUnavailable, 'minimize-moves')
       const assignedBefore = new Set(
