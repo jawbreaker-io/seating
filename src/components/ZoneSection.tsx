@@ -34,17 +34,17 @@ export function ZoneSection({
   return (
     <motion.div
       data-testid={`zone-${zone.id}`}
-      className="rounded-2xl p-5 shadow-sm"
+      className="rounded-2xl p-6 shadow-sm"
       style={{ backgroundColor: zone.color }}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ type: 'spring', stiffness: 200, damping: 20 }}
     >
-      <h3 className="text-base font-semibold text-gray-700 mb-3">{zone.name}</h3>
+      <h3 className="text-lg font-semibold text-gray-700 mb-4">{zone.name}</h3>
       <div
-        className="grid gap-4"
+        className="grid gap-5"
         style={{
-          gridTemplateColumns: `repeat(${zone.cols}, 6rem)`,
+          gridTemplateColumns: `repeat(${zone.cols}, 7rem)`,
         }}
       >
         {desks.map((desk) => (
