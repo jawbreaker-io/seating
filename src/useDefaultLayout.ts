@@ -1,8 +1,25 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useCallback } from 'react'
 import { parseJsonConfig } from './shareUtils'
 import type { SharePayload } from './shareUtils'
 
 const HAS_USER_DATA_KEY = 'seating-chart-assignments'
+
+/**
+ * Fetch and parse /default-layout.json.
+ * Returns the parsed SharePayload on success, or null if the file is missing
+ * or invalid.
+ */
+async function fetchDefaultLayout(): Promise<SharePayload | null> {
+  try {
+    const res = await fetch('/default-layout.json')
+    if (!res.ok) return null
+    const json = await res.json()
+    if (!json || typeof json !== 'object') return null
+    return parseJsonConfig(json as Record<string, unknown>)
+  } catch {
+    return null
+  }
+}
 
 /**
  * On first visit (no localStorage data), attempt to fetch /default-layout.json.
@@ -10,8 +27,15 @@ const HAS_USER_DATA_KEY = 'seating-chart-assignments'
  * a JSON file previously exported from the web app.
  *
  * Calls `onLoad` with the parsed payload when a valid default layout is found.
+ *
+ * Returns a `resetToDefault` function that re-fetches /default-layout.json and
+ * loads it if available, otherwise falls back to the hardcoded defaults via
+ * `onFallbackReset`.
  */
-export function useDefaultLayout(onLoad: (payload: SharePayload) => void) {
+export function useDefaultLayout(
+  onLoad: (payload: SharePayload) => void,
+  onFallbackReset: () => void,
+) {
   const firedRef = useRef(false)
 
   useEffect(() => {
@@ -21,18 +45,19 @@ export function useDefaultLayout(onLoad: (payload: SharePayload) => void) {
     // Skip if the user already has saved data
     if (localStorage.getItem(HAS_USER_DATA_KEY) !== null) return
 
-    fetch('/default-layout.json')
-      .then((res) => {
-        if (!res.ok) return null
-        return res.json()
-      })
-      .then((json) => {
-        if (!json || typeof json !== 'object') return
-        const payload = parseJsonConfig(json as Record<string, unknown>)
-        onLoad(payload)
-      })
-      .catch(() => {
-        // No default layout file mounted — use built-in defaults
-      })
+    fetchDefaultLayout().then((payload) => {
+      if (payload) onLoad(payload)
+    })
   }, [onLoad])
+
+  const resetToDefault = useCallback(async () => {
+    const payload = await fetchDefaultLayout()
+    if (payload) {
+      onLoad(payload)
+    } else {
+      onFallbackReset()
+    }
+  }, [onLoad, onFallbackReset])
+
+  return { resetToDefault }
 }
