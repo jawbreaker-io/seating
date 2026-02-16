@@ -2,6 +2,7 @@ import { motion } from 'motion/react'
 import { HiOfficeBuilding, HiPencil, HiSparkles, HiUserGroup } from 'react-icons/hi'
 import type { Desk, Employee, Zone, SeatingMap, DeskNameMap, UnavailableDeskMap, PinnedDeskMap } from '../types'
 import { SharePanel } from './SharePanel'
+import type { SharePayload } from '../shareUtils'
 
 interface HeaderProps {
   seating: SeatingMap
@@ -12,7 +13,7 @@ interface HeaderProps {
   pinnedDesks: PinnedDeskMap
   employees: Employee[]
   departmentColors: Record<string, string>
-  onImport: (seating: SeatingMap) => void
+  onImport: (payload: SharePayload) => void
   onEditLayout: () => void
   onEditPeople: () => void
   onOptimize: () => void

@@ -11,6 +11,7 @@ import { LayoutEditor } from './components/LayoutEditor'
 import { OptimizePanel } from './components/OptimizePanel'
 import { PeopleEditor } from './components/PeopleEditor'
 import { getSharedData } from './shareUtils'
+import type { SharePayload } from './shareUtils'
 
 function App() {
   const {
@@ -61,6 +62,22 @@ function App() {
   const [showOptimizer, setShowOptimizer] = useState(false)
   const [showPeopleEditor, setShowPeopleEditor] = useState(false)
 
+  const loadSharePayload = useCallback(
+    (shared: SharePayload) => {
+      if (shared.zones.length > 0) {
+        loadSharedLayout(shared.zones, shared.deskNames, shared.unavailableDesks)
+      }
+      loadShared(shared.seating)
+      if (shared.pinnedDesks) {
+        loadSharedPins(shared.pinnedDesks)
+      }
+      if (shared.employees && shared.departmentColors) {
+        loadSharedPeople(shared.employees, shared.departmentColors)
+      }
+    },
+    [loadShared, loadSharedLayout, loadSharedPins, loadSharedPeople],
+  )
+
   const loadedRef = useRef(false)
   useEffect(() => {
     if (loadedRef.current) return
@@ -74,21 +91,12 @@ function App() {
           'A shared arrangement was found in the link. Load it? This will replace your current arrangement.',
         )
       if (shouldLoad) {
-        if (shared.zones.length > 0) {
-          loadSharedLayout(shared.zones, shared.deskNames, shared.unavailableDesks)
-        }
-        loadShared(shared.seating)
-        if (shared.pinnedDesks) {
-          loadSharedPins(shared.pinnedDesks)
-        }
-        if (shared.employees && shared.departmentColors) {
-          loadSharedPeople(shared.employees, shared.departmentColors)
-        }
+        loadSharePayload(shared)
       }
       // Clear the hash regardless so subsequent reloads use localStorage
       window.history.replaceState(null, '', window.location.pathname)
     }
-  }, [loadShared, loadSharedLayout, loadSharedPins, loadSharedPeople])
+  }, [loadSharePayload])
 
   // When a desk is marked unavailable, unassign any employee sitting there
   const handleToggleDeskUnavailable = useCallback(
@@ -113,7 +121,7 @@ function App() {
           pinnedDesks={pinnedDesks}
           employees={employees}
           departmentColors={departmentColors}
-          onImport={loadShared}
+          onImport={loadSharePayload}
           onEditLayout={() => setShowLayoutEditor(true)}
           onEditPeople={() => setShowPeopleEditor(true)}
           onOptimize={() => setShowOptimizer(true)}

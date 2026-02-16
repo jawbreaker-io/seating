@@ -166,9 +166,9 @@ export function getSharedData(): SharePayload | null {
   return decodeSharePayload(match[1])
 }
 
-/** Export the seating arrangement as a downloadable JSON file. */
-export function exportSeatingJson(seating: SeatingMap) {
-  const data = JSON.stringify(seating, null, 2)
+/** Export the full config (seating, zones, people, etc.) as a downloadable JSON file. */
+export function exportSeatingJson(payload: SharePayload) {
+  const data = JSON.stringify(payload, null, 2)
   const blob = new Blob([data], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
@@ -178,10 +178,38 @@ export function exportSeatingJson(seating: SeatingMap) {
   URL.revokeObjectURL(url)
 }
 
-/** Import a seating arrangement from a JSON file. Returns a promise with the SeatingMap. */
+/**
+ * Parse a JSON config object into a SharePayload.
+ * Handles both legacy (SeatingMap-only) and full payload formats.
+ */
+export function parseJsonConfig(
+  parsed: Record<string, unknown>,
+  desks?: Desk[],
+): SharePayload {
+  // Full payload format: has 'zones' or 'seating' keys
+  if (Array.isArray(parsed.zones) || parsed.seating !== undefined) {
+    const zones: Zone[] = (parsed.zones as Zone[]) ?? []
+    const resolvedDesks = zones.length > 0 ? generateDesks(zones) : (desks ?? defaultDesks)
+    const sharedEmployees: Employee[] | undefined = parsed.employees as Employee[] | undefined
+    const departmentColors = parsed.departmentColors as Record<string, string> | undefined
+    const rawSeating = (parsed.seating ?? {}) as Record<string, unknown>
+    const seating = validateSeating(rawSeating, resolvedDesks, sharedEmployees)
+    const deskNames: DeskNameMap = (parsed.deskNames as DeskNameMap) ?? {}
+    const unavailableDesks: UnavailableDeskMap = (parsed.unavailableDesks as UnavailableDeskMap) ?? {}
+    const pinnedDesks: PinnedDeskMap = (parsed.pinnedDesks as PinnedDeskMap) ?? {}
+    return { zones, seating, deskNames, unavailableDesks, pinnedDesks, employees: sharedEmployees, departmentColors }
+  }
+
+  // Legacy format: plain SeatingMap object (deskId -> employeeId)
+  const resolvedDesks = desks ?? defaultDesks
+  const seating = validateSeating(parsed, resolvedDesks)
+  return { zones: [], seating, deskNames: {}, unavailableDesks: {} }
+}
+
+/** Import a config from a JSON file. Returns a promise with the full SharePayload. */
 export function importSeatingJson(
   desks: Desk[] = defaultDesks,
-): Promise<SeatingMap> {
+): Promise<SharePayload> {
   return new Promise((resolve, reject) => {
     const input = document.createElement('input')
     input.type = 'file'
@@ -200,7 +228,7 @@ export function importSeatingJson(
             reject(new Error('Invalid seating file'))
             return
           }
-          resolve(validateSeating(parsed as Record<string, unknown>, desks))
+          resolve(parseJsonConfig(parsed as Record<string, unknown>, desks))
         } catch {
           reject(new Error('Invalid JSON file'))
         }

@@ -145,4 +145,96 @@ describe('exportSeatingPdf', () => {
       expect.any(Number),
     )
   })
+
+  it('renders all department names in the employee directory', () => {
+    exportSeatingPdf(buildData())
+    const departments = [...new Set(employees.map((e) => e.department))]
+    for (const dept of departments) {
+      expect(mockText).toHaveBeenCalledWith(
+        dept,
+        expect.any(Number),
+        expect.any(Number),
+      )
+    }
+  })
+
+  it('renders department color indicators for each employee', () => {
+    exportSeatingPdf(buildData())
+    // Each employee gets a department color circle in the directory
+    expect(mockCircle.mock.calls.length).toBe(employees.length)
+  })
+
+  it('renders N/A text for unavailable desks', () => {
+    const data = buildData({ unavailableDesks: { 'z1-d5': true } })
+    exportSeatingPdf(data)
+    expect(mockText).toHaveBeenCalledWith(
+      'N/A',
+      expect.any(Number),
+      expect.any(Number),
+      expect.objectContaining({ align: 'center' }),
+    )
+  })
+
+  it('renders zone backgrounds for each zone', () => {
+    exportSeatingPdf(buildData())
+    // Each zone gets a background rounded rect (plus desk cell rects)
+    // At minimum, there should be 1 background rect per zone
+    expect(mockRoundedRect.mock.calls.length).toBeGreaterThanOrEqual(zones.length)
+  })
+
+  it('renders desk cells for each desk', () => {
+    exportSeatingPdf(buildData())
+    // Each desk gets 2 roundedRect calls (fill + stroke)
+    expect(mockRoundedRect.mock.calls.length).toBeGreaterThanOrEqual(desks.length * 2)
+  })
+
+  it('renders employee names on occupied desks in the floor plan', () => {
+    const data = buildData()
+    exportSeatingPdf(data)
+    // Alice Chen is at z1-d0 in defaultSeating
+    expect(mockText).toHaveBeenCalledWith(
+      'Alice Chen',
+      expect.any(Number),
+      expect.any(Number),
+    )
+  })
+
+  it('uses custom department colors for color indicators', () => {
+    const customColors = { Engineering: '#ff0000', Design: '#00ff00' }
+    exportSeatingPdf(buildData({ departmentColors: { ...DEFAULT_DEPARTMENT_COLORS, ...customColors } }))
+    // Should have called setFillColor with custom red for Engineering
+    expect(mockSetFillColor).toHaveBeenCalledWith(255, 0, 0)
+    // Should have called setFillColor with custom green for Design
+    expect(mockSetFillColor).toHaveBeenCalledWith(0, 255, 0)
+  })
+
+  it('renders table headers in employee directory', () => {
+    exportSeatingPdf(buildData())
+    expect(mockText).toHaveBeenCalledWith('Employee', expect.any(Number), expect.any(Number))
+    expect(mockText).toHaveBeenCalledWith('Department', expect.any(Number), expect.any(Number))
+    expect(mockText).toHaveBeenCalledWith('Desk', expect.any(Number), expect.any(Number))
+    expect(mockText).toHaveBeenCalledWith('Zone', expect.any(Number), expect.any(Number))
+  })
+
+  it('renders zone names in the employee directory for seated employees', () => {
+    exportSeatingPdf(buildData())
+    // Alice Chen is in Engineering Bay (z1)
+    expect(mockText).toHaveBeenCalledWith(
+      'Engineering Bay',
+      expect.any(Number),
+      expect.any(Number),
+    )
+  })
+
+  it('renders multiple custom desk names on the floor plan', () => {
+    const deskNames = {
+      'z1-d0': 'Alice Spot',
+      'z2-d0': 'Design Corner',
+      'z3-d0': 'Sales Hub',
+    }
+    exportSeatingPdf(buildData({ deskNames }))
+    expect(mockText).toHaveBeenCalledWith('Alice Spot', expect.any(Number), expect.any(Number))
+    expect(mockText).toHaveBeenCalledWith('Design Corner', expect.any(Number), expect.any(Number))
+    expect(mockText).toHaveBeenCalledWith('Sales Hub', expect.any(Number), expect.any(Number))
+  })
 })
