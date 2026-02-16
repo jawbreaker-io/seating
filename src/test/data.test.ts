@@ -6,6 +6,7 @@ import {
   defaultSeating,
   generateDesks,
   getDepartmentColor,
+  UNKNOWN_DEPARTMENT,
 } from '../data'
 
 describe('data module', () => {
@@ -107,8 +108,12 @@ describe('data module', () => {
       expect(getDepartmentColor('Marketing')).toMatch(/^#/)
     })
 
-    it('returns a fallback color for unknown departments', () => {
-      expect(getDepartmentColor('Unknown')).toBe('#6b7280')
+    it('returns a color for the Unknown department', () => {
+      expect(getDepartmentColor(UNKNOWN_DEPARTMENT)).toBe('#6b7280')
+    })
+
+    it('returns a fallback color for unrecognized departments', () => {
+      expect(getDepartmentColor('NonExistent')).toBe('#6b7280')
     })
   })
 })

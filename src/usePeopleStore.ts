@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from 'react'
 import type { Employee } from './types'
-import { employees as defaultEmployees } from './data'
+import { employees as defaultEmployees, UNKNOWN_DEPARTMENT } from './data'
 
 const EMPLOYEES_STORAGE_KEY = 'seating-chart-employees'
 const DEPT_COLORS_STORAGE_KEY = 'seating-chart-dept-colors'
@@ -14,6 +14,7 @@ const DEFAULT_DEPARTMENT_COLORS: Record<string, string> = {
   Finance: '#eab308',
   Product: '#06b6d4',
   Operations: '#6366f1',
+  [UNKNOWN_DEPARTMENT]: '#6b7280',
 }
 
 function makeAvatar(name: string): string {
