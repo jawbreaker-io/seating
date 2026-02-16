@@ -9,6 +9,9 @@ import { FloorPlan } from './components/FloorPlan'
 import { Sidebar } from './components/Sidebar'
 import { LayoutEditor } from './components/LayoutEditor'
 import { OptimizePanel } from './components/OptimizePanel'
+import { OptimizeAnimation } from './components/OptimizeAnimation'
+import type { AnimationMove } from './components/OptimizeAnimation'
+import type { SeatingMap } from './types'
 import { PeopleEditor } from './components/PeopleEditor'
 import { getSharedData } from './shareUtils'
 import type { SharePayload } from './shareUtils'
@@ -62,6 +65,10 @@ function App() {
   const [showLayoutEditor, setShowLayoutEditor] = useState(false)
   const [showOptimizer, setShowOptimizer] = useState(false)
   const [showPeopleEditor, setShowPeopleEditor] = useState(false)
+  const [pendingOptimization, setPendingOptimization] = useState<{
+    seating: SeatingMap
+    moves: AnimationMove[]
+  } | null>(null)
 
   const loadSharePayload = useCallback(
     (shared: SharePayload) => {
@@ -119,6 +126,27 @@ function App() {
     },
     [seating, unassignEmployee, setDeskUnavailable],
   )
+
+  // When the user applies an optimization, close the panel and start the move animation
+  const handleOptimizeApply = useCallback(
+    (newSeating: SeatingMap, moves: AnimationMove[]) => {
+      setShowOptimizer(false)
+      if (moves.length > 0) {
+        setPendingOptimization({ seating: newSeating, moves })
+      } else {
+        loadShared(newSeating)
+      }
+    },
+    [loadShared],
+  )
+
+  // When the animation finishes, apply the final seating arrangement
+  const handleAnimationComplete = useCallback(() => {
+    if (pendingOptimization) {
+      loadShared(pendingOptimization.seating)
+      setPendingOptimization(null)
+    }
+  }, [pendingOptimization, loadShared])
 
   return (
     <DragProvider>
@@ -181,7 +209,7 @@ function App() {
             pinnedDesks={pinnedDesks}
             unavailableDesks={unavailableDesks}
             employees={employees}
-            onApply={loadShared}
+            onApply={handleOptimizeApply}
             onClose={() => setShowOptimizer(false)}
           />
         )}
@@ -202,6 +230,16 @@ function App() {
             onRemoveDepartment={removeDepartment}
             onResetPeople={resetPeople}
             onClose={() => setShowPeopleEditor(false)}
+          />
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {pendingOptimization && (
+          <OptimizeAnimation
+            moves={pendingOptimization.moves}
+            employees={employees}
+            getDepartmentColor={getDepartmentColor}
+            onComplete={handleAnimationComplete}
           />
         )}
       </AnimatePresence>
