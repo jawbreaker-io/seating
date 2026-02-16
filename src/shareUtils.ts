@@ -383,13 +383,13 @@ export function exportSeatingPdf(data: PdfExportData) {
         doc.text(emp.department, cx + 2, cy + 11)
 
         // Desk label
-        const deskLabel = deskNames[desk.id] || desk.id
+        const deskLabel = deskNames[desk.id] || desk.id.split('-').pop()?.toUpperCase() || desk.id
         doc.setFontSize(5)
         doc.setTextColor(150, 150, 150)
         doc.text(deskLabel, cx + 2, cy + 15)
       } else {
         // Empty desk
-        const deskLabel = deskNames[desk.id] || desk.id
+        const deskLabel = deskNames[desk.id] || desk.id.split('-').pop()?.toUpperCase() || desk.id
         doc.setFontSize(6)
         doc.setFont('helvetica', 'normal')
         doc.setTextColor(180, 180, 180)
@@ -435,7 +435,7 @@ export function exportSeatingPdf(data: PdfExportData) {
     const deskId = deskEntry ? deskEntry[0] : null
     const desk = deskId ? desks.find((d) => d.id === deskId) : null
     const zone = desk ? zones.find((z) => z.id === desk.zone) : null
-    const deskLabel = deskId ? (deskNames[deskId] || deskId) : '—'
+    const deskLabel = deskId ? (deskNames[deskId] || deskId.split('-').pop()?.toUpperCase() || deskId) : '—'
     const zoneLabel = zone ? zone.name : '—'
 
     // Alternating row background
