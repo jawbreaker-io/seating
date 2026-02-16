@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { HiSparkles, HiSwitchHorizontal, HiLightningBolt, HiCheck } from 'react-icons/hi'
 import type { Desk, Employee, SeatingMap, PinnedDeskMap, UnavailableDeskMap, DeskNameMap, OptimizationMode, OptimizationResult } from '../types'
+import type { AnimationMove } from './OptimizeAnimation'
 import { optimizeSeating } from '../optimizer'
 import { getDepartmentColor } from '../data'
 
@@ -23,7 +24,7 @@ interface OptimizePanelProps {
   pinnedDesks: PinnedDeskMap
   unavailableDesks: UnavailableDeskMap
   employees: Employee[]
-  onApply: (seating: SeatingMap) => void
+  onApply: (seating: SeatingMap, moves: AnimationMove[]) => void
   onClose: () => void
 }
 
@@ -66,10 +67,10 @@ export function OptimizePanel({
   const handleApply = useCallback(() => {
     setApplied(true)
     setTimeout(() => {
-      onApply(result.seating)
+      onApply(result.seating, movedEmployees)
       onClose()
-    }, 600)
-  }, [result.seating, onApply, onClose])
+    }, 500)
+  }, [result.seating, movedEmployees, onApply, onClose])
 
   const pinnedCount = Object.keys(pinnedDesks).filter((d) => seating[d]).length
   const scoreImprovement = result.clusterScore - result.previousScore
