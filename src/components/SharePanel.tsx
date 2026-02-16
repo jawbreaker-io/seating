@@ -4,6 +4,7 @@ import { HiShare, HiLink, HiDownload, HiUpload } from 'react-icons/hi'
 import { HiDocumentText } from 'react-icons/hi'
 import type { Desk, Employee, Zone, SeatingMap, DeskNameMap, UnavailableDeskMap, PinnedDeskMap } from '../types'
 import { buildShareUrl, exportSeatingJson, exportSeatingPdf, importSeatingJson } from '../shareUtils'
+import type { SharePayload } from '../shareUtils'
 
 interface SharePanelProps {
   seating: SeatingMap
@@ -14,7 +15,7 @@ interface SharePanelProps {
   pinnedDesks: PinnedDeskMap
   employees: Employee[]
   departmentColors: Record<string, string>
-  onImport: (seating: SeatingMap) => void
+  onImport: (payload: SharePayload) => void
 }
 
 export function SharePanel({ seating, zones, desks, deskNames, unavailableDesks, pinnedDesks, employees, departmentColors, onImport }: SharePanelProps) {
@@ -54,7 +55,7 @@ export function SharePanel({ seating, zones, desks, deskNames, unavailableDesks,
   }
 
   const handleExport = () => {
-    exportSeatingJson(seating)
+    exportSeatingJson({ zones, seating, deskNames, unavailableDesks, pinnedDesks, employees, departmentColors })
   }
 
   const handleExportPdf = () => {
@@ -71,7 +72,7 @@ export function SharePanel({ seating, zones, desks, deskNames, unavailableDesks,
       onImport(imported)
       setOpen(false)
     } catch {
-      // user cancelled or invalid file — ignore
+      // user cancelled or invalid file -- ignore
     }
   }
 
