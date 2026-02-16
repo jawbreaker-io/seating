@@ -166,6 +166,7 @@ function App() {
           <OptimizePanel
             seating={seating}
             desks={desks}
+            deskNames={deskNames}
             pinnedDesks={pinnedDesks}
             unavailableDesks={unavailableDesks}
             employees={employees}

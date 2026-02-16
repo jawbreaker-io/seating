@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { HiSparkles, HiSwitchHorizontal, HiLightningBolt, HiCheck } from 'react-icons/hi'
-import type { Desk, Employee, SeatingMap, PinnedDeskMap, UnavailableDeskMap, OptimizationMode, OptimizationResult } from '../types'
+import type { Desk, Employee, SeatingMap, PinnedDeskMap, UnavailableDeskMap, DeskNameMap, OptimizationMode, OptimizationResult } from '../types'
 import { optimizeSeating } from '../optimizer'
 import { getDepartmentColor } from '../data'
 
@@ -19,6 +19,7 @@ const PARTICLE_POSITIONS = Array.from({ length: 20 }, (_, i) => {
 interface OptimizePanelProps {
   seating: SeatingMap
   desks: Desk[]
+  deskNames: DeskNameMap
   pinnedDesks: PinnedDeskMap
   unavailableDesks: UnavailableDeskMap
   employees: Employee[]
@@ -29,6 +30,7 @@ interface OptimizePanelProps {
 export function OptimizePanel({
   seating,
   desks,
+  deskNames,
   pinnedDesks,
   unavailableDesks,
   employees,
@@ -189,13 +191,13 @@ export function OptimizePanel({
                     </div>
                     <span className="font-medium text-gray-700 flex-1 truncate">{emp.name}</span>
                     <span className="text-gray-400 text-[10px] flex-shrink-0">
-                      {fromDesk.split('-').pop()?.toUpperCase()}
+                      {deskNames[fromDesk] || fromDesk.split('-').pop()?.toUpperCase()}
                     </span>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3 text-gray-300 flex-shrink-0">
                       <path fillRule="evenodd" d="M2 8a.75.75 0 0 1 .75-.75h8.69L8.22 4.03a.75.75 0 0 1 1.06-1.06l4.5 4.5a.75.75 0 0 1 0 1.06l-4.5 4.5a.75.75 0 0 1-1.06-1.06l3.22-3.22H2.75A.75.75 0 0 1 2 8Z" clipRule="evenodd" />
                     </svg>
                     <span className="text-gray-700 text-[10px] font-medium flex-shrink-0">
-                      {toDesk.split('-').pop()?.toUpperCase()}
+                      {deskNames[toDesk] || toDesk.split('-').pop()?.toUpperCase()}
                     </span>
                   </motion.div>
                 )
