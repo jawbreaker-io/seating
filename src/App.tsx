@@ -99,8 +99,17 @@ function App() {
     }
   }, [loadSharePayload])
 
-  // On first visit with no saved data, load /default-layout.json if mounted
-  useDefaultLayout(loadSharePayload)
+  // Reset everything to hardcoded defaults (used as fallback when no
+  // default-layout.json is available)
+  const fallbackReset = useCallback(() => {
+    resetLayout()
+    resetSeating()
+    resetPeople()
+  }, [resetLayout, resetSeating, resetPeople])
+
+  // On first visit with no saved data, load /default-layout.json if mounted.
+  // Also provides resetToDefault for the "Reset Default" button.
+  const { resetToDefault } = useDefaultLayout(loadSharePayload, fallbackReset)
 
   // When a desk is marked unavailable, unassign any employee sitting there
   const handleToggleDeskUnavailable = useCallback(
@@ -148,7 +157,7 @@ function App() {
           <Sidebar
             unassigned={unassignedEmployees}
             getDepartmentColor={getDepartmentColor}
-            onReset={resetSeating}
+            onReset={resetToDefault}
             onClear={clearAll}
           />
         </div>
