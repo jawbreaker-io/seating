@@ -38,11 +38,34 @@ async function clearAppStorage(): Promise<void> {
 async function fetchDefaultLayout(): Promise<SharePayload | null> {
   try {
     const res = await fetch('/default-layout.json')
-    if (!res.ok) return null
+    if (!res.ok) {
+      if (res.status === 404) {
+        console.info('[default-layout] No default-layout.json found (404). Using built-in defaults.')
+      } else {
+        console.warn(`[default-layout] Failed to fetch default-layout.json: HTTP ${res.status}`)
+      }
+      return null
+    }
+
+    // Guard against the SPA fallback serving index.html as a 200 for missing
+    // files — the content-type will be text/html instead of application/json.
+    const contentType = res.headers.get('content-type') ?? ''
+    if (contentType.includes('text/html')) {
+      console.warn(
+        '[default-layout] Received HTML instead of JSON for /default-layout.json. ' +
+          'The file is likely not mounted in the container. Using built-in defaults.',
+      )
+      return null
+    }
+
     const json = await res.json()
-    if (!json || typeof json !== 'object') return null
+    if (!json || typeof json !== 'object') {
+      console.warn('[default-layout] default-layout.json is not a valid JSON object.')
+      return null
+    }
     return parseJsonConfig(json as Record<string, unknown>)
   } catch {
+    console.warn('[default-layout] Failed to parse default-layout.json. Using built-in defaults.')
     return null
   }
 }

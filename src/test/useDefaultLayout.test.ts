@@ -157,6 +157,22 @@ describe('useDefaultLayout', () => {
     await new Promise((r) => setTimeout(r, 50))
     expect(onLoad).not.toHaveBeenCalled()
   })
+
+  it('rejects HTML responses (SPA fallback serving index.html)', async () => {
+    const onLoad = vi.fn()
+    const onFallbackReset = vi.fn()
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
+      new Response('<!DOCTYPE html><html><body>SPA</body></html>', {
+        status: 200,
+        headers: { 'Content-Type': 'text/html' },
+      }),
+    )
+
+    renderHook(() => useDefaultLayout(onLoad, onFallbackReset))
+
+    await new Promise((r) => setTimeout(r, 50))
+    expect(onLoad).not.toHaveBeenCalled()
+  })
 })
 
 describe('resetToDefault', () => {
