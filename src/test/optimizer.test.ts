@@ -36,16 +36,16 @@ describe('clusterScore', () => {
     expect(clusteredScore).toBeGreaterThan(scatteredScore)
   })
 
-  it('does not count Unknown department employees toward clustering score', () => {
+  it('does not count Other department employees toward clustering score', () => {
     const unknownEmployees: Employee[] = [
-      { id: 'u1', name: 'Unknown A', department: UNKNOWN_DEPARTMENT, avatar: 'UA' },
-      { id: 'u2', name: 'Unknown B', department: UNKNOWN_DEPARTMENT, avatar: 'UB' },
-      { id: 'u3', name: 'Unknown C', department: UNKNOWN_DEPARTMENT, avatar: 'UC' },
+      { id: 'u1', name: 'Other A', department: UNKNOWN_DEPARTMENT, avatar: 'UA' },
+      { id: 'u2', name: 'Other B', department: UNKNOWN_DEPARTMENT, avatar: 'UB' },
+      { id: 'u3', name: 'Other C', department: UNKNOWN_DEPARTMENT, avatar: 'UC' },
     ]
     const seating: SeatingMap = {}
     for (const d of desks) seating[d.id] = null
 
-    // Place three Unknown employees adjacent in same zone
+    // Place three Other employees adjacent in same zone
     seating['z1-d0'] = 'u1'
     seating['z1-d1'] = 'u2'
     seating['z1-d2'] = 'u3'
@@ -137,8 +137,8 @@ describe('optimizeSeating', () => {
     })
   })
 
-  it('does not group Unknown department employees together in full mode', () => {
-    // Create employees: some Engineering + some Unknown
+  it('does not group Other department employees together in full mode', () => {
+    // Create employees: some Engineering + some Other
     const testEmployees: Employee[] = [
       { id: 't1', name: 'Eng A', department: 'Engineering', avatar: 'EA' },
       { id: 't2', name: 'Eng B', department: 'Engineering', avatar: 'EB' },
@@ -149,9 +149,9 @@ describe('optimizeSeating', () => {
     const seating: SeatingMap = {}
     for (const d of desks) seating[d.id] = null
     // Scatter them across zones
-    seating['z1-d0'] = 't3' // Unknown in z1
+    seating['z1-d0'] = 't3' // Other in z1
     seating['z2-d0'] = 't1' // Engineering in z2
-    seating['z3-d0'] = 't4' // Unknown in z3
+    seating['z3-d0'] = 't4' // Other in z3
     seating['z3-d1'] = 't2' // Engineering in z3
 
     const result = optimizeSeating(seating, desks, noPins, noUnavailable, 'full', testEmployees)
@@ -160,7 +160,7 @@ describe('optimizeSeating', () => {
     const assignedAfter = new Set(Object.values(result.seating).filter(Boolean))
     expect(assignedAfter).toEqual(new Set(['t1', 't2', 't3', 't4']))
 
-    // Unknown employees should not generate clustering score
+    // Other employees should not generate clustering score
     const unknownOnly: Employee[] = testEmployees.filter(e => e.department === UNKNOWN_DEPARTMENT)
     const unknownSeating: SeatingMap = {}
     for (const [deskId, empId] of Object.entries(result.seating)) {
@@ -170,7 +170,7 @@ describe('optimizeSeating', () => {
         unknownSeating[deskId] = null
       }
     }
-    // Unknown employees by themselves contribute 0 to cluster score
+    // Other employees by themselves contribute 0 to cluster score
     expect(clusterScore(unknownSeating, desks, unknownOnly)).toBe(0)
   })
 

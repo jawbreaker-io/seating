@@ -23,13 +23,13 @@ describe('usePeopleStore', () => {
     expect(result.current.employees[0].name).toBe('Test User')
   })
 
-  describe('Unknown department', () => {
-    it('always includes the Unknown department on initialization', () => {
+  describe('Other department', () => {
+    it('always includes the Other department on initialization', () => {
       const { result } = renderHook(() => usePeopleStore())
       expect(result.current.departments).toContain(UNKNOWN_DEPARTMENT)
     })
 
-    it('includes Unknown department even when loading from localStorage without it', () => {
+    it('includes Other department even when loading from localStorage without it', () => {
       const colors = { Engineering: '#3b82f6' }
       localStorage.setItem('seating-chart-dept-colors', JSON.stringify(colors))
       const { result } = renderHook(() => usePeopleStore())
@@ -40,18 +40,18 @@ describe('usePeopleStore', () => {
     it('cannot be deleted', () => {
       const { result } = renderHook(() => usePeopleStore())
 
-      // Add an employee to Unknown
+      // Add an employee to Other
       act(() => {
         result.current.addEmployee('Orphan User', UNKNOWN_DEPARTMENT)
       })
       const countBefore = result.current.employees.length
 
-      // Attempt to delete Unknown department
+      // Attempt to delete Other department
       act(() => {
         result.current.removeDepartment(UNKNOWN_DEPARTMENT)
       })
 
-      // Unknown should still exist and employee should not be affected
+      // Other should still exist and employee should not be affected
       expect(result.current.departments).toContain(UNKNOWN_DEPARTMENT)
       expect(result.current.employees).toHaveLength(countBefore)
     })
@@ -69,7 +69,7 @@ describe('usePeopleStore', () => {
   })
 
   describe('removeDepartment', () => {
-    it('reassigns employees to Unknown instead of deleting them', () => {
+    it('reassigns employees to Other instead of deleting them', () => {
       const { result } = renderHook(() => usePeopleStore())
       const engineeringEmployees = result.current.employees.filter(
         (e) => e.department === 'Engineering',
@@ -89,7 +89,7 @@ describe('usePeopleStore', () => {
         result.current.employees.filter((e) => e.department === 'Engineering'),
       ).toHaveLength(0)
 
-      // Former Engineering employees should now be in Unknown
+      // Former Engineering employees should now be in Other
       for (const emp of engineeringEmployees) {
         const updated = result.current.employees.find((e) => e.id === emp.id)
         expect(updated).toBeDefined()

@@ -108,7 +108,7 @@ describe('data module', () => {
       expect(getDepartmentColor('Marketing')).toMatch(/^#/)
     })
 
-    it('returns a color for the Unknown department', () => {
+    it('returns a color for the Other department', () => {
       expect(getDepartmentColor(UNKNOWN_DEPARTMENT)).toBe('#6b7280')
     })
 

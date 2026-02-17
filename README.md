@@ -64,11 +64,11 @@ New visitors (with no saved browser data) will automatically see the exported la
 
 ## Department Management
 
-A built-in **Unknown** department is always present in the system. It serves as the default department for people who are not assigned elsewhere.
+A built-in **Other** department is always present in the system. It serves as the default department for people who are not assigned elsewhere.
 
-- The Unknown department is created automatically when the application starts with no saved data.
+- The Other department is created automatically when the application starts with no saved data.
 - It **cannot be deleted or renamed**.
-- When any other department is deleted, its people are **moved to the Unknown department** rather than being removed from the system.
+- When any other department is deleted, its people are **moved to the Other department** rather than being removed from the system.
 
 ## Scripts
 
