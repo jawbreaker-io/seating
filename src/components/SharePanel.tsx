@@ -81,7 +81,7 @@ export function SharePanel({ seating, zones, desks, deskNames, unavailableDesks,
       <button
         data-testid="share-btn"
         onClick={() => setOpen((prev) => !prev)}
-        className="flex items-center gap-1.5 text-sm px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors font-medium"
+        className="flex items-center gap-2 text-sm px-5 py-2.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors font-medium"
       >
         <HiShare className="text-base" />
         Share

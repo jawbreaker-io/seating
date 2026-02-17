@@ -35,46 +35,46 @@ export function Header({ seating, zones, desks, deskNames, unavailableDesks, pin
           animate={{ rotate: 0 }}
           transition={{ type: 'spring', stiffness: 200 }}
         >
-          <HiOfficeBuilding className="text-3xl text-blue-600" />
+          <HiOfficeBuilding className="text-4xl text-blue-600" />
         </motion.div>
         <div>
-          <h1 className="text-xl font-bold text-gray-800">
+          <h1 className="text-2xl font-bold text-gray-800">
             Office Seating Chart
           </h1>
-          <p className="text-sm text-gray-500">
+          <p className="text-base text-gray-500">
             Drag and drop to rearrange seats
           </p>
         </div>
       </div>
-      <div className="flex items-center gap-4 text-sm text-gray-500">
-        <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-green-400" />
+      <div className="flex items-center gap-5 text-sm text-gray-500">
+        <div className="flex items-center gap-2">
+          <span className="w-3 h-3 rounded-full bg-green-400" />
           {assigned} seated
         </div>
-        <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-orange-400" />
+        <div className="flex items-center gap-2">
+          <span className="w-3 h-3 rounded-full bg-orange-400" />
           {totalPeople - assigned} unassigned
         </div>
-        <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-gray-300" />
+        <div className="flex items-center gap-2">
+          <span className="w-3 h-3 rounded-full bg-gray-300" />
           {availableDesks - assigned} empty desks
         </div>
         {unavailableCount > 0 && (
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-red-300" />
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 rounded-full bg-red-300" />
             {unavailableCount} N/A
           </div>
         )}
         {pinnedCount > 0 && (
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 rounded-full bg-amber-400" />
             {pinnedCount} pinned
           </div>
         )}
         <button
           data-testid="optimize-btn"
           onClick={onOptimize}
-          className="flex items-center gap-1.5 text-sm px-4 py-2 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition-colors font-medium"
+          className="flex items-center gap-2 text-sm px-5 py-2.5 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition-colors font-medium"
         >
           <HiSparkles className="text-base" />
           Optimize
@@ -82,7 +82,7 @@ export function Header({ seating, zones, desks, deskNames, unavailableDesks, pin
         <button
           data-testid="edit-people-btn"
           onClick={onEditPeople}
-          className="flex items-center gap-1.5 text-sm px-4 py-2 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition-colors font-medium"
+          className="flex items-center gap-2 text-sm px-5 py-2.5 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition-colors font-medium"
         >
           <HiUserGroup className="text-base" />
           Edit People
@@ -90,7 +90,7 @@ export function Header({ seating, zones, desks, deskNames, unavailableDesks, pin
         <button
           data-testid="edit-layout-btn"
           onClick={onEditLayout}
-          className="flex items-center gap-1.5 text-sm px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+          className="flex items-center gap-2 text-sm px-5 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
         >
           <HiPencil className="text-base" />
           Edit Layout

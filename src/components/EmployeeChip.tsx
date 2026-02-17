@@ -24,8 +24,8 @@ export function EmployeeChip({
 
   const sizeClasses =
     size === 'sm'
-      ? 'w-10 h-10 text-xs'
-      : 'w-12 h-12 text-sm'
+      ? 'w-12 h-12 text-sm'
+      : 'w-14 h-14 text-base'
 
   return (
     <motion.div
@@ -72,7 +72,7 @@ export function EmployeeChip({
             e.stopPropagation()
             onRemove()
           }}
-          className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs leading-none flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+          className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 text-white rounded-full text-xs leading-none flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
         >
           ×
         </button>
