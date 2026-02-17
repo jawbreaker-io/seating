@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { clusterScore, countMoves, optimizeSeating } from '../optimizer'
-import { employees, desks, defaultSeating } from '../data'
-import type { SeatingMap, PinnedDeskMap, UnavailableDeskMap } from '../types'
+import { employees, desks, defaultSeating, UNKNOWN_DEPARTMENT } from '../data'
+import type { Desk, Employee, SeatingMap, PinnedDeskMap, UnavailableDeskMap } from '../types'
 
 describe('clusterScore', () => {
   it('returns 0 for empty seating', () => {
@@ -34,6 +34,23 @@ describe('clusterScore', () => {
     const clusteredScore = clusterScore(clustered, desks, employees)
     const scatteredScore = clusterScore(scattered, desks, employees)
     expect(clusteredScore).toBeGreaterThan(scatteredScore)
+  })
+
+  it('does not count Unknown department employees toward clustering score', () => {
+    const unknownEmployees: Employee[] = [
+      { id: 'u1', name: 'Unknown A', department: UNKNOWN_DEPARTMENT, avatar: 'UA' },
+      { id: 'u2', name: 'Unknown B', department: UNKNOWN_DEPARTMENT, avatar: 'UB' },
+      { id: 'u3', name: 'Unknown C', department: UNKNOWN_DEPARTMENT, avatar: 'UC' },
+    ]
+    const seating: SeatingMap = {}
+    for (const d of desks) seating[d.id] = null
+
+    // Place three Unknown employees adjacent in same zone
+    seating['z1-d0'] = 'u1'
+    seating['z1-d1'] = 'u2'
+    seating['z1-d2'] = 'u3'
+
+    expect(clusterScore(seating, desks, unknownEmployees)).toBe(0)
   })
 
   it('gives higher score for adjacent desks than distant same-zone desks', () => {
@@ -120,6 +137,43 @@ describe('optimizeSeating', () => {
     })
   })
 
+  it('does not group Unknown department employees together in full mode', () => {
+    // Create employees: some Engineering + some Unknown
+    const testEmployees: Employee[] = [
+      { id: 't1', name: 'Eng A', department: 'Engineering', avatar: 'EA' },
+      { id: 't2', name: 'Eng B', department: 'Engineering', avatar: 'EB' },
+      { id: 't3', name: 'Unk A', department: UNKNOWN_DEPARTMENT, avatar: 'UA' },
+      { id: 't4', name: 'Unk B', department: UNKNOWN_DEPARTMENT, avatar: 'UB' },
+    ]
+
+    const seating: SeatingMap = {}
+    for (const d of desks) seating[d.id] = null
+    // Scatter them across zones
+    seating['z1-d0'] = 't3' // Unknown in z1
+    seating['z2-d0'] = 't1' // Engineering in z2
+    seating['z3-d0'] = 't4' // Unknown in z3
+    seating['z3-d1'] = 't2' // Engineering in z3
+
+    const result = optimizeSeating(seating, desks, noPins, noUnavailable, 'full', testEmployees)
+
+    // Engineering employees should end up clustered together
+    const assignedAfter = new Set(Object.values(result.seating).filter(Boolean))
+    expect(assignedAfter).toEqual(new Set(['t1', 't2', 't3', 't4']))
+
+    // Unknown employees should not generate clustering score
+    const unknownOnly: Employee[] = testEmployees.filter(e => e.department === UNKNOWN_DEPARTMENT)
+    const unknownSeating: SeatingMap = {}
+    for (const [deskId, empId] of Object.entries(result.seating)) {
+      if (empId && unknownOnly.some(e => e.id === empId)) {
+        unknownSeating[deskId] = empId
+      } else {
+        unknownSeating[deskId] = null
+      }
+    }
+    // Unknown employees by themselves contribute 0 to cluster score
+    expect(clusterScore(unknownSeating, desks, unknownOnly)).toBe(0)
+  })
+
   it('full mode scores at least as high as minimize-moves mode', () => {
       const fullResult = optimizeSeating(defaultSeating, desks, noPins, noUnavailable, 'full', employees)
       const minResult = optimizeSeating(defaultSeating, desks, noPins, noUnavailable, 'minimize-moves', employees)
@@ -154,6 +208,40 @@ describe('optimizeSeating', () => {
       const result = optimizeSeating(defaultSeating, desks, pins, noUnavailable, 'minimize-moves', employees)
       expect(result.seating['z1-d0']).toBe(defaultSeating['z1-d0'])
       expect(result.seating['z3-d0']).toBe(defaultSeating['z3-d0'])
+    })
+
+    it('never exceeds full optimization move count (cyclic arrangement)', () => {
+      // Cyclic department arrangement where greedy swaps need 2 swaps (4 moves)
+      // but direct reassignment only needs 3 moves (a 3-way rotation).
+      const testDesks: Desk[] = [
+        { id: 'tz1-d0', row: 0, col: 0, zone: 'tz1' },
+        { id: 'tz1-d1', row: 0, col: 1, zone: 'tz1' },
+        { id: 'tz2-d0', row: 0, col: 0, zone: 'tz2' },
+        { id: 'tz2-d1', row: 0, col: 1, zone: 'tz2' },
+        { id: 'tz3-d0', row: 0, col: 0, zone: 'tz3' },
+        { id: 'tz3-d1', row: 0, col: 1, zone: 'tz3' },
+      ]
+
+      const testEmployees: Employee[] = [
+        { id: 'ta1', name: 'A1', department: 'Alpha', avatar: 'A1' },
+        { id: 'ta2', name: 'A2', department: 'Alpha', avatar: 'A2' },
+        { id: 'tb1', name: 'B1', department: 'Beta', avatar: 'B1' },
+        { id: 'tb2', name: 'B2', department: 'Beta', avatar: 'B2' },
+        { id: 'tc1', name: 'C1', department: 'Gamma', avatar: 'C1' },
+        { id: 'tc2', name: 'C2', department: 'Gamma', avatar: 'C2' },
+      ]
+
+      // Each zone has one employee from two different departments (cyclic)
+      const cyclicSeating: SeatingMap = {
+        'tz1-d0': 'ta1', 'tz1-d1': 'tb1',
+        'tz2-d0': 'tb2', 'tz2-d1': 'tc1',
+        'tz3-d0': 'tc2', 'tz3-d1': 'ta2',
+      }
+
+      const fullResult = optimizeSeating(cyclicSeating, testDesks, {}, {}, 'full', testEmployees)
+      const minResult = optimizeSeating(cyclicSeating, testDesks, {}, {}, 'minimize-moves', testEmployees)
+
+      expect(minResult.moves).toBeLessThanOrEqual(fullResult.moves)
     })
   })
 })

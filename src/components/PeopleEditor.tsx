@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { HiPlus, HiTrash, HiX, HiUserGroup, HiColorSwatch, HiPencil, HiCheck } from 'react-icons/hi'
 import type { Employee } from '../types'
+import { UNKNOWN_DEPARTMENT } from '../data'
 
 const DEPT_COLORS = [
   '#3b82f6',
@@ -53,7 +54,7 @@ export function PeopleEditor({
 }: PeopleEditorProps) {
   const [tab, setTab] = useState<Tab>('people')
   const [newName, setNewName] = useState('')
-  const [newDept, setNewDept] = useState(departments[0] ?? '')
+  const [newDept, setNewDept] = useState(departments.includes(UNKNOWN_DEPARTMENT) ? UNKNOWN_DEPARTMENT : departments[0] ?? '')
   const [newDeptName, setNewDeptName] = useState('')
   const [newDeptColor, setNewDeptColor] = useState(DEPT_COLORS[0])
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)

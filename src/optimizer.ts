@@ -1,4 +1,5 @@
 import type { Desk, Employee, SeatingMap, PinnedDeskMap, UnavailableDeskMap, OptimizationMode, OptimizationResult } from './types'
+import { UNKNOWN_DEPARTMENT } from './data'
 
 /**
  * Calculate a clustering score for a seating arrangement.
@@ -21,6 +22,8 @@ export function clusterScore(seating: SeatingMap, desks: Desk[], employees: Empl
     if (!empId) continue
     const emp = employeeMap.get(empId)
     if (!emp) continue
+    // Unknown department employees have no clustering requirements
+    if (emp.department === UNKNOWN_DEPARTMENT) continue
     const desk = deskById.get(deskId)
     if (!desk) continue
 
@@ -119,7 +122,13 @@ function optimizeFull(
   )
 
   const deptGroups = new Map<string, string[]>()
+  const unknownEmployees: string[] = []
   for (const emp of allRelevant) {
+    // Unknown department employees are not grouped — they have no clustering requirements
+    if (emp.department === UNKNOWN_DEPARTMENT) {
+      unknownEmployees.push(emp.id)
+      continue
+    }
     const group = deptGroups.get(emp.department) ?? []
     group.push(emp.id)
     deptGroups.set(emp.department, group)
@@ -170,6 +179,21 @@ function optimizeFull(
         placedEmployees.add(empId)
       }
       availableDesksByZone.set(zone, available)
+    }
+  }
+
+  // Place Unknown department employees into remaining desks (no grouping)
+  for (const empId of unknownEmployees) {
+    if (placedEmployees.has(empId)) continue
+    for (const zone of zones) {
+      const available = availableDesksByZone.get(zone) ?? []
+      if (available.length > 0) {
+        const desk = available.shift()!
+        result[desk.id] = empId
+        placedEmployees.add(empId)
+        availableDesksByZone.set(zone, available)
+        break
+      }
     }
   }
 
@@ -266,9 +290,10 @@ function refineBySwapping(
 }
 
 /**
- * Minimize-moves optimization: iteratively swap employees to improve clustering
- * while keeping the total number of moves low.
- * Uses a greedy approach: find the best swap, apply it, repeat.
+ * Minimize-moves optimization: find the arrangement that improves clustering
+ * with the fewest office moves.
+ * Considers both greedy swaps and full reassignment, returning whichever
+ * produces fewer moves (with clustering score as a tiebreaker).
  */
 function optimizeMinimizeMoves(
   currentSeating: SeatingMap,
@@ -277,11 +302,32 @@ function optimizeMinimizeMoves(
   unavailableDesks: UnavailableDeskMap,
   employees: Employee[],
 ): SeatingMap {
+  // Strategy 1: greedy swaps from current arrangement
   const movableDeskIds = desks
     .filter((d) => !pinnedDesks[d.id] && !unavailableDesks[d.id])
     .map((d) => d.id)
+  const swapResult = refineBySwapping(currentSeating, desks, movableDeskIds, 200, employees)
 
-  return refineBySwapping(currentSeating, desks, movableDeskIds, 200, employees)
+  // Strategy 2: full reassignment (bulk department grouping + swaps)
+  const fullResult = optimizeFull(currentSeating, desks, pinnedDesks, unavailableDesks, employees)
+
+  // Pick whichever strategy produces fewer moves
+  const swapMoves = countMoves(currentSeating, swapResult)
+  const fullMoves = countMoves(currentSeating, fullResult)
+
+  if (fullMoves < swapMoves) {
+    return fullResult
+  }
+  if (fullMoves === swapMoves) {
+    // Same number of moves — prefer better clustering
+    const swapScore = clusterScore(swapResult, desks, employees)
+    const fullScore = clusterScore(fullResult, desks, employees)
+    if (fullScore > swapScore) {
+      return fullResult
+    }
+  }
+
+  return swapResult
 }
 
 /**
