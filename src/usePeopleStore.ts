@@ -50,7 +50,14 @@ function saveEmployees(employees: Employee[]) {
 function loadDepartmentColors(): Record<string, string> {
   try {
     const stored = localStorage.getItem(DEPT_COLORS_STORAGE_KEY)
-    if (stored) return JSON.parse(stored) as Record<string, string>
+    if (stored) {
+      const parsed = JSON.parse(stored) as Record<string, string>
+      // Ensure the Unknown department always exists
+      if (!parsed[UNKNOWN_DEPARTMENT]) {
+        parsed[UNKNOWN_DEPARTMENT] = DEFAULT_DEPARTMENT_COLORS[UNKNOWN_DEPARTMENT]
+      }
+      return parsed
+    }
   } catch {
     // fall through to default
   }
@@ -156,6 +163,8 @@ export function usePeopleStore() {
   const renameDepartment = useCallback(
     (oldName: string, newName: string) => {
       if (oldName === newName) return
+      // The Unknown department cannot be renamed
+      if (oldName === UNKNOWN_DEPARTMENT) return
       // Update color map
       setDepartmentColors((prev) => {
         const next = { ...prev }
@@ -179,15 +188,19 @@ export function usePeopleStore() {
   )
 
   const removeDepartment = useCallback((name: string) => {
+    // The Unknown department cannot be deleted
+    if (name === UNKNOWN_DEPARTMENT) return
     setDepartmentColors((prev) => {
       const next = { ...prev }
       delete next[name]
       saveDepartmentColors(next)
       return next
     })
-    // Remove employees in that department
+    // Reassign employees to the Unknown department instead of removing them
     setEmployees((prev) => {
-      const next = prev.filter((e) => e.department !== name)
+      const next = prev.map((e) =>
+        e.department === name ? { ...e, department: UNKNOWN_DEPARTMENT } : e,
+      )
       saveEmployees(next)
       return next
     })

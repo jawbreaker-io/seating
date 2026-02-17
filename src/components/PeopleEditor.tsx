@@ -475,30 +475,34 @@ export function PeopleEditor({
                               {employeeCountByDept(dept)} {employeeCountByDept(dept) === 1 ? 'person' : 'people'}
                             </p>
                           </div>
-                          <button
-                            data-testid={`edit-dept-${dept}`}
-                            onClick={() => startEditDeptName(dept)}
-                            className="p-1.5 rounded-lg text-gray-300 hover:text-purple-500 hover:bg-purple-50 transition-colors"
-                            title="Rename department"
-                          >
-                            <HiPencil className="text-sm" />
-                          </button>
-                          <button
-                            data-testid={`delete-dept-${dept}`}
-                            onClick={() => handleDeleteDepartment(dept)}
-                            className={`p-1.5 rounded-lg transition-colors ${
-                              confirmDeleteDept === dept
-                                ? 'bg-red-500 text-white'
-                                : 'text-gray-300 hover:text-red-500 hover:bg-red-50'
-                            }`}
-                            title={
-                              confirmDeleteDept === dept
-                                ? `Click again to delete (removes ${employeeCountByDept(dept)} people)`
-                                : 'Delete department'
-                            }
-                          >
-                            <HiTrash className="text-sm" />
-                          </button>
+                          {dept !== UNKNOWN_DEPARTMENT && (
+                            <button
+                              data-testid={`edit-dept-${dept}`}
+                              onClick={() => startEditDeptName(dept)}
+                              className="p-1.5 rounded-lg text-gray-300 hover:text-purple-500 hover:bg-purple-50 transition-colors"
+                              title="Rename department"
+                            >
+                              <HiPencil className="text-sm" />
+                            </button>
+                          )}
+                          {dept !== UNKNOWN_DEPARTMENT && (
+                            <button
+                              data-testid={`delete-dept-${dept}`}
+                              onClick={() => handleDeleteDepartment(dept)}
+                              className={`p-1.5 rounded-lg transition-colors ${
+                                confirmDeleteDept === dept
+                                  ? 'bg-red-500 text-white'
+                                  : 'text-gray-300 hover:text-red-500 hover:bg-red-50'
+                              }`}
+                              title={
+                                confirmDeleteDept === dept
+                                  ? `Click again to delete (moves ${employeeCountByDept(dept)} people to ${UNKNOWN_DEPARTMENT})`
+                                  : 'Delete department'
+                              }
+                            >
+                              <HiTrash className="text-sm" />
+                            </button>
+                          )}
                         </>
                       )}
                     </div>
