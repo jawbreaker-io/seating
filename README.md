@@ -7,7 +7,7 @@ A drag-and-drop office seating chart application built with React, TypeScript, a
 - Drag-and-drop employee assignment to desks
 - Customizable zones with configurable rows, columns, and colors
 - Pin employees to desks, mark desks as unavailable
-- Department management with color coding
+- Department management with color coding and safe deletion (people are preserved)
 - Share arrangements via URL or export as JSON/PDF
 - Automatic seating optimization
 
@@ -61,6 +61,14 @@ docker compose up -d
 ```
 
 New visitors (with no saved browser data) will automatically see the exported layout. Users who have already customized their arrangement in the browser are not affected — their localStorage data takes precedence.
+
+## Department Management
+
+A built-in **Unknown** department is always present in the system. It serves as the default department for people who are not assigned elsewhere.
+
+- The Unknown department is created automatically when the application starts with no saved data.
+- It **cannot be deleted or renamed**.
+- When any other department is deleted, its people are **moved to the Unknown department** rather than being removed from the system.
 
 ## Scripts
 
