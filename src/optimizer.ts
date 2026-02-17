@@ -22,7 +22,7 @@ export function clusterScore(seating: SeatingMap, desks: Desk[], employees: Empl
     if (!empId) continue
     const emp = employeeMap.get(empId)
     if (!emp) continue
-    // Unknown department employees have no clustering requirements
+    // Other department employees have no clustering requirements
     if (emp.department === UNKNOWN_DEPARTMENT) continue
     const desk = deskById.get(deskId)
     if (!desk) continue
@@ -124,7 +124,7 @@ function optimizeFull(
   const deptGroups = new Map<string, string[]>()
   const unknownEmployees: string[] = []
   for (const emp of allRelevant) {
-    // Unknown department employees are not grouped — they have no clustering requirements
+    // Other department employees are not grouped — they have no clustering requirements
     if (emp.department === UNKNOWN_DEPARTMENT) {
       unknownEmployees.push(emp.id)
       continue
@@ -182,7 +182,7 @@ function optimizeFull(
     }
   }
 
-  // Place Unknown department employees into remaining desks (no grouping)
+  // Place Other department employees into remaining desks (no grouping)
   for (const empId of unknownEmployees) {
     if (placedEmployees.has(empId)) continue
     for (const zone of zones) {
