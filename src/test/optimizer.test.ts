@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { clusterScore, countMoves, optimizeSeating } from '../optimizer'
 import { employees, desks, defaultSeating, UNKNOWN_DEPARTMENT } from '../data'
-import type { Employee, SeatingMap, PinnedDeskMap, UnavailableDeskMap } from '../types'
+import type { Desk, Employee, SeatingMap, PinnedDeskMap, UnavailableDeskMap } from '../types'
 
 describe('clusterScore', () => {
   it('returns 0 for empty seating', () => {
@@ -208,6 +208,40 @@ describe('optimizeSeating', () => {
       const result = optimizeSeating(defaultSeating, desks, pins, noUnavailable, 'minimize-moves', employees)
       expect(result.seating['z1-d0']).toBe(defaultSeating['z1-d0'])
       expect(result.seating['z3-d0']).toBe(defaultSeating['z3-d0'])
+    })
+
+    it('never exceeds full optimization move count (cyclic arrangement)', () => {
+      // Cyclic department arrangement where greedy swaps need 2 swaps (4 moves)
+      // but direct reassignment only needs 3 moves (a 3-way rotation).
+      const testDesks: Desk[] = [
+        { id: 'tz1-d0', row: 0, col: 0, zone: 'tz1' },
+        { id: 'tz1-d1', row: 0, col: 1, zone: 'tz1' },
+        { id: 'tz2-d0', row: 0, col: 0, zone: 'tz2' },
+        { id: 'tz2-d1', row: 0, col: 1, zone: 'tz2' },
+        { id: 'tz3-d0', row: 0, col: 0, zone: 'tz3' },
+        { id: 'tz3-d1', row: 0, col: 1, zone: 'tz3' },
+      ]
+
+      const testEmployees: Employee[] = [
+        { id: 'ta1', name: 'A1', department: 'Alpha', avatar: 'A1' },
+        { id: 'ta2', name: 'A2', department: 'Alpha', avatar: 'A2' },
+        { id: 'tb1', name: 'B1', department: 'Beta', avatar: 'B1' },
+        { id: 'tb2', name: 'B2', department: 'Beta', avatar: 'B2' },
+        { id: 'tc1', name: 'C1', department: 'Gamma', avatar: 'C1' },
+        { id: 'tc2', name: 'C2', department: 'Gamma', avatar: 'C2' },
+      ]
+
+      // Each zone has one employee from two different departments (cyclic)
+      const cyclicSeating: SeatingMap = {
+        'tz1-d0': 'ta1', 'tz1-d1': 'tb1',
+        'tz2-d0': 'tb2', 'tz2-d1': 'tc1',
+        'tz3-d0': 'tc2', 'tz3-d1': 'ta2',
+      }
+
+      const fullResult = optimizeSeating(cyclicSeating, testDesks, {}, {}, 'full', testEmployees)
+      const minResult = optimizeSeating(cyclicSeating, testDesks, {}, {}, 'minimize-moves', testEmployees)
+
+      expect(minResult.moves).toBeLessThanOrEqual(fullResult.moves)
     })
   })
 })
