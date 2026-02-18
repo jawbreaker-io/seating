@@ -166,6 +166,73 @@ export function getSharedData(): SharePayload | null {
   return decodeSharePayload(match[1])
 }
 
+/** Data needed for a shareable move plan link. */
+export interface MovePlanPayload {
+  originalSeating: SeatingMap
+  newSeating: SeatingMap
+  employees: Employee[]
+  zones: Zone[]
+  deskNames: DeskNameMap
+  departmentColors: Record<string, string>
+}
+
+/** Encode a move plan payload into a URL-safe base64url string. */
+export function encodeMovePlanPayload(payload: MovePlanPayload): string {
+  const compact: Record<string, unknown> = {
+    o: Object.fromEntries(Object.entries(payload.originalSeating).filter(([, v]) => v != null)),
+    n: Object.fromEntries(Object.entries(payload.newSeating).filter(([, v]) => v != null)),
+    e: payload.employees,
+    z: payload.zones,
+  }
+  if (Object.keys(payload.deskNames).length > 0) {
+    compact.dn = payload.deskNames
+  }
+  if (Object.keys(payload.departmentColors).length > 0) {
+    compact.dc = payload.departmentColors
+  }
+  const json = JSON.stringify(compact)
+  return btoa(json).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+}
+
+/** Decode a base64url string back into a MovePlanPayload. */
+export function decodeMovePlanPayload(encoded: string): MovePlanPayload | null {
+  try {
+    if (!encoded) return null
+    const padded = encoded.replace(/-/g, '+').replace(/_/g, '/')
+    const decoded = atob(padded)
+    const parsed = JSON.parse(decoded)
+
+    const zones: Zone[] = parsed.z ?? []
+    const generatedDesks = zones.length > 0 ? generateDesks(zones) : defaultDesks
+    const employees: Employee[] = parsed.e ?? []
+
+    const originalSeating = validateSeating(parsed.o ?? {}, generatedDesks, employees)
+    const newSeating = validateSeating(parsed.n ?? {}, generatedDesks, employees)
+    const deskNames: DeskNameMap = parsed.dn ?? {}
+    const departmentColors: Record<string, string> = parsed.dc ?? {}
+
+    return { originalSeating, newSeating, employees, zones, deskNames, departmentColors }
+  } catch {
+    return null
+  }
+}
+
+/** Build a shareable URL for a move plan. */
+export function buildMovePlanUrl(payload: MovePlanPayload): string {
+  const encoded = encodeMovePlanPayload(payload)
+  const url = new URL(window.location.href.split('#')[0])
+  url.hash = `moveplan=${encoded}`
+  return url.toString()
+}
+
+/** Extract move plan data from the current URL hash, if present. */
+export function getMovePlanData(): MovePlanPayload | null {
+  const hash = window.location.hash
+  const match = hash.match(/^#moveplan=(.+)$/)
+  if (!match) return null
+  return decodeMovePlanPayload(match[1])
+}
+
 /** Export the full config (seating, zones, people, etc.) as a downloadable JSON file. */
 export function exportSeatingJson(payload: SharePayload) {
   const data = JSON.stringify(payload, null, 2)
