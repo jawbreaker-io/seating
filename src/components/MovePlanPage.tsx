@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
-import { HiSwitchHorizontal, HiCheckCircle, HiArrowCircleRight, HiMinusCircle, HiPlusCircle } from 'react-icons/hi'
+import { HiSwitchHorizontal, HiCheckCircle, HiArrowCircleRight, HiMinusCircle, HiPlusCircle, HiExternalLink } from 'react-icons/hi'
 import type { MovePlanPayload } from '../shareUtils'
+import { buildShareUrl } from '../shareUtils'
 import { getDepartmentColor as getDefaultDeptColor } from '../data'
 import { computeMovePlan } from '../moveOptimizer'
 import type { MovePlan, MoveStep } from '../moveOptimizer'
@@ -23,7 +24,7 @@ function StepIcon({ step }: { step: MoveStep }) {
 }
 
 export function MovePlanPage({ payload }: MovePlanPageProps) {
-  const { originalSeating, newSeating, employees, deskNames, departmentColors } = payload
+  const { originalSeating, newSeating, employees, zones, deskNames, departmentColors } = payload
 
   const getDeptColor = (dept: string) => getDefaultDeptColor(dept, departmentColors)
 
@@ -32,6 +33,32 @@ export function MovePlanPage({ payload }: MovePlanPageProps) {
   const movePlan: MovePlan = useMemo(
     () => computeMovePlan(originalSeating, newSeating, employees, deskNames),
     [originalSeating, newSeating, employees, deskNames],
+  )
+
+  const originalLayoutUrl = useMemo(
+    () =>
+      buildShareUrl({
+        zones,
+        seating: originalSeating,
+        deskNames,
+        unavailableDesks: {},
+        employees,
+        departmentColors,
+      }),
+    [zones, originalSeating, deskNames, employees, departmentColors],
+  )
+
+  const newLayoutUrl = useMemo(
+    () =>
+      buildShareUrl({
+        zones,
+        seating: newSeating,
+        deskNames,
+        unavailableDesks: {},
+        employees,
+        departmentColors,
+      }),
+    [zones, newSeating, deskNames, employees, departmentColors],
   )
 
   // Group steps by type for section headers
@@ -88,6 +115,29 @@ export function MovePlanPage({ payload }: MovePlanPageProps) {
             Follow the steps below in order to complete the office rearrangement.
             Each step can be executed as soon as the previous one is done.
           </p>
+          <div className="flex gap-3 mt-3">
+            <a
+              href={originalLayoutUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-testid="view-original-layout-link"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
+            >
+              <HiExternalLink className="text-base" />
+              View Original Layout
+            </a>
+            <span className="text-gray-300">|</span>
+            <a
+              href={newLayoutUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-testid="view-new-layout-link"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
+            >
+              <HiExternalLink className="text-base" />
+              View New Layout
+            </a>
+          </div>
         </div>
       </header>
 
