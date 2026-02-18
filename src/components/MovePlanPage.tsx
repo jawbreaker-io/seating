@@ -16,6 +16,9 @@ function StepIcon({ step }: { step: MoveStep }) {
   if (!step.toDeskId) {
     return <HiMinusCircle className="text-red-400 text-lg flex-shrink-0" />
   }
+  if (step.swapPartnerNames && step.swapPartnerNames.length > 0) {
+    return <HiSwitchHorizontal className="text-amber-500 text-lg flex-shrink-0" />
+  }
   return <HiArrowCircleRight className="text-blue-500 text-lg flex-shrink-0" />
 }
 
@@ -36,7 +39,8 @@ export function MovePlanPage({ payload }: MovePlanPageProps) {
     const result: { title: string; icon: React.ReactNode; steps: MoveStep[] }[] = []
 
     const removals = movePlan.steps.filter((s) => !s.toDeskId)
-    const moves = movePlan.steps.filter((s) => s.fromDeskId && s.toDeskId)
+    const directMoves = movePlan.steps.filter((s) => s.fromDeskId && s.toDeskId && !s.swapPartnerNames?.length)
+    const swaps = movePlan.steps.filter((s) => s.fromDeskId && s.toDeskId && s.swapPartnerNames && s.swapPartnerNames.length > 0)
     const additions = movePlan.steps.filter((s) => !s.fromDeskId)
 
     if (removals.length > 0) {
@@ -46,11 +50,18 @@ export function MovePlanPage({ payload }: MovePlanPageProps) {
         steps: removals,
       })
     }
-    if (moves.length > 0) {
+    if (directMoves.length > 0) {
       result.push({
-        title: `Desk Moves (${moves.length})`,
+        title: `Desk Moves (${directMoves.length})`,
         icon: <HiArrowCircleRight className="text-blue-500" />,
-        steps: moves,
+        steps: directMoves,
+      })
+    }
+    if (swaps.length > 0) {
+      result.push({
+        title: `Desk Swaps (${swaps.length})`,
+        icon: <HiSwitchHorizontal className="text-amber-500" />,
+        steps: swaps,
       })
     }
     if (additions.length > 0) {
@@ -105,9 +116,8 @@ export function MovePlanPage({ payload }: MovePlanPageProps) {
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
             <p className="text-sm text-amber-800">
               <strong>{movePlan.summary.cyclesDetected} swap cycle{movePlan.summary.cyclesDetected > 1 ? 's' : ''} detected.</strong>{' '}
-              In a cycle, people need each other's desks. The plan handles this by
-              temporarily vacating one person, cascading the moves, then seating them last.
-              Look for the paired "vacate" and "seat" steps for the same person.
+              In a cycle, people need each other's desks. These swaps must happen
+              at the same time &mdash; look for the swap partner listed on each step.
             </p>
           </div>
         )}
@@ -142,9 +152,11 @@ export function MovePlanPage({ payload }: MovePlanPageProps) {
                     {/* Employee name */}
                     <div className="flex-1 min-w-0">
                       <span className="font-medium text-gray-800 truncate block">{step.employeeName}</span>
-                      {emp && (
+                      {step.swapPartnerNames && step.swapPartnerNames.length > 0 ? (
+                        <span className="text-xs text-amber-600">Swap with {step.swapPartnerNames.join(', ')}</span>
+                      ) : emp ? (
                         <span className="text-xs text-gray-400">{emp.department}</span>
-                      )}
+                      ) : null}
                     </div>
 
                     {/* Move description */}

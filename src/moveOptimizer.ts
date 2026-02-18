@@ -8,6 +8,7 @@ export interface MoveStep {
   toDeskId: string | null
   fromDeskLabel: string
   toDeskLabel: string
+  swapPartnerNames?: string[]
 }
 
 export interface MovePlanSummary {
@@ -144,7 +145,8 @@ export function computeMovePlan(
 
   // --- Phase 3: Break cycles ---
   // All remaining employees form disjoint cycles in the permutation.
-  // For each cycle, temporarily vacate one person, cascade moves, then place them.
+  // Instead of vacating to a temp spot, show all cycle members as
+  // simultaneous swaps with partner annotations.
   let cyclesDetected = 0
   while (remaining.size > 0) {
     cyclesDetected++
@@ -163,29 +165,40 @@ export function computeMovePlan(
       currentEmpId = blocker
     }
 
-    // Execute the cycle: vacate the first person, cascade in reverse, seat first person
-    const firstEmp = cycle[0]
-    const firstFrom = empCurrentDesk.get(firstEmp)!
+    // Build partner name lists for each member
+    const cyclePartnerNames = cycle.map((empId) => {
+      const others = cycle.filter((id) => id !== empId)
+      return others.map((id) => empMap.get(id)?.name ?? id)
+    })
 
-    // Temporarily vacate: first person leaves their desk
-    doMove(firstEmp, firstFrom, null)
-    remaining.delete(firstEmp)
+    // Emit one direct move per cycle member (these happen simultaneously)
+    // First, clear all source desks, then set all target desks
+    const cycleFromDesks = cycle.map((empId) => empCurrentDesk.get(empId)!)
+    const cycleToDesks = cycle.map((empId) => empTargetDesk.get(empId)!)
 
-    // Cascade the rest in reverse order (last in cycle moves first)
-    for (let i = cycle.length - 1; i >= 1; i--) {
-      const empId = cycle[i]
-      const from = empCurrentDesk.get(empId)!
-      const to = empTargetDesk.get(empId)!
-      doMove(empId, from, to)
-      remaining.delete(empId)
-      // Update the employee's "current desk" so later logic is consistent
-      empCurrentDesk.set(empId, to)
+    for (const fromDesk of cycleFromDesks) {
+      occupancy.set(fromDesk, null)
+    }
+    for (let i = 0; i < cycle.length; i++) {
+      occupancy.set(cycleToDesks[i], cycle[i])
     }
 
-    // Seat the first person at their target
-    const firstTarget = empTargetDesk.get(firstEmp)!
-    doMove(firstEmp, null, firstTarget)
-    empCurrentDesk.set(firstEmp, firstTarget)
+    for (let i = 0; i < cycle.length; i++) {
+      const empId = cycle[i]
+      const emp = empMap.get(empId)
+      steps.push({
+        step: stepNum++,
+        employeeId: empId,
+        employeeName: emp?.name ?? empId,
+        fromDeskId: cycleFromDesks[i],
+        toDeskId: cycleToDesks[i],
+        fromDeskLabel: getDeskLabel(cycleFromDesks[i], deskNames),
+        toDeskLabel: getDeskLabel(cycleToDesks[i], deskNames),
+        swapPartnerNames: cyclePartnerNames[i],
+      })
+      remaining.delete(empId)
+      empCurrentDesk.set(empId, cycleToDesks[i])
+    }
   }
 
   // --- Phase 4: New assignments ---
