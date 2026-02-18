@@ -13,11 +13,23 @@ import { OptimizeAnimation } from './components/OptimizeAnimation'
 import type { AnimationMove } from './components/OptimizeAnimation'
 import type { SeatingMap } from './types'
 import { PeopleEditor } from './components/PeopleEditor'
-import { getSharedData } from './shareUtils'
-import type { SharePayload } from './shareUtils'
+import { MovePlanPanel } from './components/MovePlanPanel'
+import { MovePlanPage } from './components/MovePlanPage'
+import { getSharedData, getMovePlanData } from './shareUtils'
+import type { SharePayload, MovePlanPayload } from './shareUtils'
 import { useDefaultLayout } from './useDefaultLayout'
 
 function App() {
+  // Check if we're on a move plan URL — if so, render the standalone page
+  const [movePlanPayload] = useState<MovePlanPayload | null>(() => getMovePlanData())
+  if (movePlanPayload) {
+    return <MovePlanPage payload={movePlanPayload} />
+  }
+
+  return <AppMain />
+}
+
+function AppMain() {
   const {
     zones,
     desks,
@@ -65,6 +77,7 @@ function App() {
   const [showLayoutEditor, setShowLayoutEditor] = useState(false)
   const [showOptimizer, setShowOptimizer] = useState(false)
   const [showPeopleEditor, setShowPeopleEditor] = useState(false)
+  const [showMovePlanner, setShowMovePlanner] = useState(false)
   const [pendingOptimization, setPendingOptimization] = useState<{
     seating: SeatingMap
     moves: AnimationMove[]
@@ -164,6 +177,7 @@ function App() {
           onEditLayout={() => setShowLayoutEditor(true)}
           onEditPeople={() => setShowPeopleEditor(true)}
           onOptimize={() => setShowOptimizer(true)}
+          onMovePlanner={() => setShowMovePlanner(true)}
         />
         <div className="flex flex-1 overflow-hidden">
           <FloorPlan
@@ -240,6 +254,18 @@ function App() {
             employees={employees}
             getDepartmentColor={getDepartmentColor}
             onComplete={handleAnimationComplete}
+          />
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {showMovePlanner && (
+          <MovePlanPanel
+            zones={zones}
+            deskNames={deskNames}
+            employees={employees}
+            departmentColors={departmentColors}
+            getDepartmentColor={getDepartmentColor}
+            onClose={() => setShowMovePlanner(false)}
           />
         )}
       </AnimatePresence>
