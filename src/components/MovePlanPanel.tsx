@@ -294,7 +294,12 @@ export function MovePlanPanel({
                       >
                         {emp?.avatar ?? '??'}
                       </div>
-                      <span className="font-medium text-gray-700 flex-1 truncate">{step.employeeName}</span>
+                      <div className="flex-1 min-w-0">
+                        <span className="font-medium text-gray-700 truncate block">{step.employeeName}</span>
+                        {step.swapPartnerNames && step.swapPartnerNames.length > 0 && (
+                          <span className="text-[10px] text-amber-600">Swap with {step.swapPartnerNames.join(', ')}</span>
+                        )}
+                      </div>
                       <span className="text-gray-400 text-xs flex-shrink-0">
                         {step.fromDeskLabel}
                       </span>
