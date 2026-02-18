@@ -514,7 +514,6 @@ describe('computeMovePlan', () => {
     // e3 is a removal, e4->d4 is a direct move to freed desk,
     // e5 and e6 are new assignments
     const removals = plan.steps.filter((s) => !s.toDeskId)
-    const additions = plan.steps.filter((s) => !s.fromDeskId)
     expect(removals.length).toBeGreaterThanOrEqual(1) // at least e3 removal
 
     // No swap steps should have null desk IDs
