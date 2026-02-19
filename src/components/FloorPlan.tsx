@@ -51,7 +51,7 @@ export function FloorPlan({
           />
         ))}
         {zones.length === 0 && (
-          <div className="flex items-center justify-center h-64 text-gray-400 text-sm">
+          <div className="flex items-center justify-center h-64 text-gray-400 dark:text-gray-500 text-sm">
             No zones configured. Click &quot;Edit Layout&quot; to add zones.
           </div>
         )}

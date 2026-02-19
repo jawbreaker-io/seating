@@ -4,6 +4,7 @@ import { DragProvider } from './DragContext'
 import { useLayoutStore } from './useLayoutStore'
 import { useSeatingStore } from './useSeatingStore'
 import { usePeopleStore } from './usePeopleStore'
+import { useDarkMode } from './useDarkMode'
 import { Header } from './components/Header'
 import { FloorPlan } from './components/FloorPlan'
 import { Sidebar } from './components/Sidebar'
@@ -20,6 +21,9 @@ import type { SharePayload, MovePlanPayload } from './shareUtils'
 import { useDefaultLayout } from './useDefaultLayout'
 
 function App() {
+  // Initialize dark mode at the top level so it applies to all routes
+  useDarkMode()
+
   // Check if we're on a move plan URL — if so, render the standalone page
   const [movePlanPayload] = useState<MovePlanPayload | null>(() => getMovePlanData())
   if (movePlanPayload) {
@@ -30,6 +34,8 @@ function App() {
 }
 
 function AppMain() {
+  const { dark, toggleDark } = useDarkMode()
+
   const {
     zones,
     desks,
@@ -163,7 +169,7 @@ function AppMain() {
 
   return (
     <DragProvider>
-      <div className="h-screen flex flex-col bg-gray-50">
+      <div className="h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
         <Header
           seating={seating}
           zones={zones}
@@ -173,6 +179,8 @@ function AppMain() {
           pinnedDesks={pinnedDesks}
           employees={employees}
           departmentColors={departmentColors}
+          dark={dark}
+          onToggleDark={toggleDark}
           onImport={loadSharePayload}
           onEditLayout={() => setShowLayoutEditor(true)}
           onEditPeople={() => setShowPeopleEditor(true)}

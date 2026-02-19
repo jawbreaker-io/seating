@@ -62,7 +62,7 @@ export function LayoutEditor({
     >
       <motion.div
         data-testid="layout-editor"
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col"
+        className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col"
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
@@ -70,16 +70,16 @@ export function LayoutEditor({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-bold text-gray-800">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+          <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100">
             Edit Office Layout
           </h2>
           <button
             data-testid="layout-editor-close"
             onClick={onClose}
-            className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
+            className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           >
-            <HiX className="text-gray-500 text-lg" />
+            <HiX className="text-gray-500 dark:text-gray-400 text-lg" />
           </button>
         </div>
 
@@ -90,7 +90,7 @@ export function LayoutEditor({
               <motion.div
                 key={zone.id}
                 data-testid={`layout-zone-${zone.id}`}
-                className="rounded-xl border border-gray-200 p-4"
+                className="rounded-xl border border-gray-200 dark:border-gray-600 p-4"
                 style={{ backgroundColor: zone.color + '40' }}
                 layout
                 initial={{ opacity: 0, y: 10 }}
@@ -107,12 +107,12 @@ export function LayoutEditor({
                       onChange={(e) =>
                         onUpdateZone(zone.id, { name: e.target.value })
                       }
-                      className="w-full text-sm font-semibold bg-white/70 border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                      className="w-full text-sm font-semibold bg-white/70 dark:bg-gray-700/70 dark:text-gray-200 border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-300"
                     />
 
                     {/* Color picker */}
                     <div className="flex items-center gap-1.5">
-                      <span className="text-xs text-gray-500 mr-1">
+                      <span className="text-xs text-gray-500 dark:text-gray-400 mr-1">
                         Color
                       </span>
                       {ZONE_COLORS.map((color) => (
@@ -121,7 +121,7 @@ export function LayoutEditor({
                           onClick={() => onUpdateZone(zone.id, { color })}
                           className={`w-6 h-6 rounded-full border-2 transition-transform ${
                             zone.color === color
-                              ? 'border-gray-600 scale-125'
+                              ? 'border-gray-600 dark:border-gray-300 scale-125'
                               : 'border-transparent hover:scale-110'
                           }`}
                           style={{ backgroundColor: color }}
@@ -132,7 +132,7 @@ export function LayoutEditor({
                     {/* Rows and cols */}
                     <div className="flex gap-4">
                       <label className="flex items-center gap-2">
-                        <span className="text-xs text-gray-500">Rows</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">Rows</span>
                         <input
                           data-testid={`zone-rows-${zone.id}`}
                           type="number"
@@ -147,11 +147,11 @@ export function LayoutEditor({
                               ),
                             })
                           }
-                          className="w-14 text-sm bg-white/70 border border-gray-200 rounded-lg px-2 py-1 text-center focus:outline-none focus:ring-2 focus:ring-blue-300"
+                          className="w-14 text-sm bg-white/70 dark:bg-gray-700/70 dark:text-gray-200 border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-1 text-center focus:outline-none focus:ring-2 focus:ring-blue-300"
                         />
                       </label>
                       <label className="flex items-center gap-2">
-                        <span className="text-xs text-gray-500">Cols</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">Cols</span>
                         <input
                           data-testid={`zone-cols-${zone.id}`}
                           type="number"
@@ -166,10 +166,10 @@ export function LayoutEditor({
                               ),
                             })
                           }
-                          className="w-14 text-sm bg-white/70 border border-gray-200 rounded-lg px-2 py-1 text-center focus:outline-none focus:ring-2 focus:ring-blue-300"
+                          className="w-14 text-sm bg-white/70 dark:bg-gray-700/70 dark:text-gray-200 border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-1 text-center focus:outline-none focus:ring-2 focus:ring-blue-300"
                         />
                       </label>
-                      <span className="text-xs text-gray-400 self-center">
+                      <span className="text-xs text-gray-400 dark:text-gray-500 self-center">
                         {zone.rows * zone.cols} desks
                       </span>
                     </div>
@@ -182,7 +182,7 @@ export function LayoutEditor({
                     className={`p-1.5 rounded-lg transition-colors ${
                       confirmDeleteId === zone.id
                         ? 'bg-red-500 text-white'
-                        : 'hover:bg-red-50 text-red-400 hover:text-red-600'
+                        : 'hover:bg-red-50 dark:hover:bg-red-900/30 text-red-400 hover:text-red-600'
                     }`}
                     title={
                       confirmDeleteId === zone.id
@@ -198,18 +198,18 @@ export function LayoutEditor({
           </AnimatePresence>
 
           {zones.length === 0 && (
-            <p className="text-sm text-gray-400 text-center py-8">
+            <p className="text-sm text-gray-400 dark:text-gray-500 text-center py-8">
               No zones yet. Add one to get started.
             </p>
           )}
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-200 flex items-center gap-2">
+        <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex items-center gap-2">
           <button
             data-testid="add-zone-btn"
             onClick={handleAddZone}
-            className="flex items-center gap-1.5 text-sm px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors font-medium"
+            className="flex items-center gap-1.5 text-sm px-4 py-2 bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/60 transition-colors font-medium"
           >
             <HiPlus className="text-base" />
             Add Zone
@@ -218,7 +218,7 @@ export function LayoutEditor({
           <button
             data-testid="reset-layout-btn"
             onClick={onResetLayout}
-            className="text-sm px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+            className="text-sm px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors font-medium"
           >
             Reset Default
           </button>

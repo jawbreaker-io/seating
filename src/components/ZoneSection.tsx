@@ -40,7 +40,7 @@ export function ZoneSection({
       animate={{ opacity: 1, y: 0 }}
       transition={{ type: 'spring', stiffness: 200, damping: 20 }}
     >
-      <h3 className="text-lg font-semibold text-gray-700 mb-4">{zone.name}</h3>
+      <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4">{zone.name}</h3>
       <div
         className="grid gap-5"
         style={{

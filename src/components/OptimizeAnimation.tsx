@@ -103,19 +103,19 @@ export function OptimizeAnimation({
         exit={{ y: -30, opacity: 0 }}
         transition={{ type: 'spring', stiffness: 300, damping: 25 }}
       >
-        <div className="bg-white/95 backdrop-blur-sm rounded-full px-5 py-2.5 shadow-lg flex items-center gap-3">
+        <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-full px-5 py-2.5 shadow-lg flex items-center gap-3">
           <motion.div
             animate={allDone ? { rotate: 0, scale: [1, 1.2, 1] } : { rotate: 360 }}
             transition={allDone ? { duration: 0.3 } : { duration: 1.5, repeat: Infinity, ease: 'linear' }}
           >
             <HiSwitchHorizontal className={`text-lg ${allDone ? 'text-green-500' : 'text-blue-500'}`} />
           </motion.div>
-          <div className="text-sm font-semibold text-gray-700">
+          <div className="text-sm font-semibold text-gray-700 dark:text-gray-200">
             {allDone
               ? 'All settled!'
               : `Moving ${Math.min(completedCount + 1, moves.length)} of ${moves.length}`}
           </div>
-          <div className="w-24 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+          <div className="w-24 h-1.5 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
             <motion.div
               className={`h-full rounded-full ${allDone ? 'bg-green-500' : 'bg-gradient-to-r from-blue-500 to-purple-500'}`}
               animate={{ width: `${(completedCount / moves.length) * 100}%` }}

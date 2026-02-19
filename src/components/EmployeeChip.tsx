@@ -59,7 +59,7 @@ export function EmployeeChip({
       transition={{ type: 'spring', stiffness: 300, damping: 20, mass: 0.8 }}
     >
       <div
-        className={`${sizeClasses} rounded-full flex items-center justify-center text-white font-bold shadow-md ${pinned ? 'ring-2 ring-amber-400 ring-offset-1' : ''}`}
+        className={`${sizeClasses} rounded-full flex items-center justify-center text-white font-bold shadow-md ${pinned ? 'ring-2 ring-amber-400 ring-offset-1 dark:ring-offset-gray-800' : ''}`}
         style={{ backgroundColor: color }}
         title={`${employee.name} - ${employee.department}${pinned ? ' (pinned)' : ''}`}
       >
