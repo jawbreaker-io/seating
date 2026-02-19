@@ -76,15 +76,15 @@ export function MovePlanPage({ payload }: MovePlanPageProps) {
   }, [movePlan.steps])
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-5">
+      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-5">
         <div className="max-w-3xl mx-auto">
           <div className="flex items-center gap-3 mb-2">
-            <HiSwitchHorizontal className="text-3xl text-indigo-500" />
-            <h1 className="text-2xl font-bold text-gray-800">Desk Move Plan</h1>
+            <HiSwitchHorizontal className="text-3xl text-indigo-500 dark:text-indigo-400" />
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Desk Move Plan</h1>
           </div>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             Follow the steps below in order to complete the office rearrangement.
             Each step can be executed as soon as the previous one is done.
           </p>
@@ -94,27 +94,27 @@ export function MovePlanPage({ payload }: MovePlanPageProps) {
       <main className="max-w-3xl mx-auto px-6 py-6">
         {/* Summary cards */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-          <div className="bg-white rounded-xl border border-gray-200 p-4 text-center">
-            <div className="text-2xl font-bold text-gray-800">{movePlan.summary.totalSteps}</div>
-            <div className="text-xs text-gray-500 font-medium mt-1">Total Steps</div>
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 text-center">
+            <div className="text-2xl font-bold text-gray-800 dark:text-gray-100">{movePlan.summary.totalSteps}</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-1">Total Steps</div>
           </div>
-          <div className="bg-white rounded-xl border border-gray-200 p-4 text-center">
-            <div className="text-2xl font-bold text-blue-600">{movePlan.summary.peopleMoving}</div>
-            <div className="text-xs text-gray-500 font-medium mt-1">Desk Changes</div>
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 text-center">
+            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{movePlan.summary.peopleMoving}</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-1">Desk Changes</div>
           </div>
-          <div className="bg-white rounded-xl border border-gray-200 p-4 text-center">
-            <div className="text-2xl font-bold text-amber-600">{movePlan.summary.cyclesDetected}</div>
-            <div className="text-xs text-gray-500 font-medium mt-1">Swap Cycles</div>
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 text-center">
+            <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">{movePlan.summary.cyclesDetected}</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-1">Swap Cycles</div>
           </div>
-          <div className="bg-white rounded-xl border border-gray-200 p-4 text-center">
-            <div className="text-2xl font-bold text-green-600">{movePlan.summary.unchanged}</div>
-            <div className="text-xs text-gray-500 font-medium mt-1">Unchanged</div>
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 text-center">
+            <div className="text-2xl font-bold text-green-600 dark:text-green-400">{movePlan.summary.unchanged}</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-1">Unchanged</div>
           </div>
         </div>
 
         {movePlan.summary.cyclesDetected > 0 && (
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
-            <p className="text-sm text-amber-800">
+          <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-xl p-4 mb-6">
+            <p className="text-sm text-amber-800 dark:text-amber-200">
               <strong>{movePlan.summary.cyclesDetected} swap cycle{movePlan.summary.cyclesDetected > 1 ? 's' : ''} detected.</strong>{' '}
               In a cycle, people need each other's desks. These swaps must happen
               at the same time &mdash; look for the swap partner listed on each step.
@@ -124,17 +124,17 @@ export function MovePlanPage({ payload }: MovePlanPageProps) {
 
         {/* Step list */}
         {movePlan.steps.length > 0 ? (
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-            <div className="divide-y divide-gray-100">
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div className="divide-y divide-gray-100 dark:divide-gray-700">
               {movePlan.steps.map((step) => {
                 const emp = empMap.get(step.employeeId)
                 return (
                   <div
                     key={`${step.step}-${step.employeeId}`}
-                    className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                   >
                     {/* Step number */}
-                    <span className="text-sm font-bold text-gray-400 w-8 text-right flex-shrink-0">
+                    <span className="text-sm font-bold text-gray-400 dark:text-gray-500 w-8 text-right flex-shrink-0">
                       {step.step}
                     </span>
 
@@ -151,11 +151,11 @@ export function MovePlanPage({ payload }: MovePlanPageProps) {
 
                     {/* Employee name */}
                     <div className="flex-1 min-w-0">
-                      <span className="font-medium text-gray-800 truncate block">{step.employeeName}</span>
+                      <span className="font-medium text-gray-800 dark:text-gray-100 truncate block">{step.employeeName}</span>
                       {step.swapPartnerNames && step.swapPartnerNames.length > 0 ? (
-                        <span className="text-xs text-amber-600">Swap with {step.swapPartnerNames.join(', ')}</span>
+                        <span className="text-xs text-amber-600 dark:text-amber-400">Swap with {step.swapPartnerNames.join(', ')}</span>
                       ) : emp ? (
-                        <span className="text-xs text-gray-400">{emp.department}</span>
+                        <span className="text-xs text-gray-400 dark:text-gray-500">{emp.department}</span>
                       ) : null}
                     </div>
 
@@ -163,18 +163,18 @@ export function MovePlanPage({ payload }: MovePlanPageProps) {
                     <div className="flex items-center gap-2 flex-shrink-0">
                       <span className={`text-xs font-medium px-2 py-0.5 rounded ${
                         step.fromDeskId
-                          ? 'bg-gray-100 text-gray-600'
-                          : 'bg-green-100 text-green-700'
+                          ? 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
+                          : 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400'
                       }`}>
                         {step.fromDeskLabel}
                       </span>
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4 text-gray-300">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4 text-gray-300 dark:text-gray-600">
                         <path fillRule="evenodd" d="M2 8a.75.75 0 0 1 .75-.75h8.69L8.22 4.03a.75.75 0 0 1 1.06-1.06l4.5 4.5a.75.75 0 0 1 0 1.06l-4.5 4.5a.75.75 0 0 1-1.06-1.06l3.22-3.22H2.75A.75.75 0 0 1 2 8Z" clipRule="evenodd" />
                       </svg>
                       <span className={`text-xs font-medium px-2 py-0.5 rounded ${
                         step.toDeskId
-                          ? 'bg-indigo-100 text-indigo-700'
-                          : 'bg-red-100 text-red-600'
+                          ? 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400'
+                          : 'bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400'
                       }`}>
                         {step.toDeskLabel}
                       </span>
@@ -185,23 +185,23 @@ export function MovePlanPage({ payload }: MovePlanPageProps) {
             </div>
           </div>
         ) : (
-          <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-12 text-center">
             <HiCheckCircle className="text-5xl text-green-400 mx-auto mb-3" />
-            <p className="text-lg font-medium text-gray-700">Layouts are identical!</p>
-            <p className="text-sm text-gray-400 mt-1">No moves are needed.</p>
+            <p className="text-lg font-medium text-gray-700 dark:text-gray-200">Layouts are identical!</p>
+            <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">No moves are needed.</p>
           </div>
         )}
 
         {/* Sections breakdown (collapsible summary) */}
         {sections.length > 1 && (
           <div className="mt-6">
-            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Summary by Type</h3>
+            <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Summary by Type</h3>
             <div className="grid gap-2">
               {sections.map((section) => (
-                <div key={section.title} className="bg-white rounded-xl border border-gray-200 p-3 flex items-center gap-3">
+                <div key={section.title} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-3 flex items-center gap-3">
                   <span className="text-lg">{section.icon}</span>
-                  <span className="text-sm font-medium text-gray-700">{section.title}</span>
-                  <span className="text-xs text-gray-400 ml-auto">
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{section.title}</span>
+                  <span className="text-xs text-gray-400 dark:text-gray-500 ml-auto">
                     Steps {section.steps[0].step}
                     {section.steps.length > 1 && `–${section.steps[section.steps.length - 1].step}`}
                   </span>

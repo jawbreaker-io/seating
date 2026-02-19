@@ -81,7 +81,7 @@ export function SharePanel({ seating, zones, desks, deskNames, unavailableDesks,
       <button
         data-testid="share-btn"
         onClick={() => setOpen((prev) => !prev)}
-        className="flex items-center gap-2 text-sm px-5 py-2.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors font-medium"
+        className="flex items-center gap-2 text-sm px-5 py-2.5 bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/60 transition-colors font-medium"
       >
         <HiShare className="text-base" />
         Share
@@ -95,39 +95,39 @@ export function SharePanel({ seating, zones, desks, deskNames, unavailableDesks,
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.95 }}
             transition={{ duration: 0.15 }}
-            className="absolute right-0 top-full mt-2 w-72 bg-white rounded-xl shadow-lg border border-gray-200 p-3 z-50"
+            className="absolute right-0 top-full mt-2 w-72 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-3 z-50"
           >
-            <p className="text-sm font-semibold text-gray-700 mb-2">
+            <p className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
               Share Arrangement
             </p>
 
             <button
               data-testid="copy-link-btn"
               onClick={handleCopyLink}
-              className="w-full flex items-center gap-2 text-sm px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-left"
+              className="w-full flex items-center gap-2 text-sm px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-left"
             >
               <HiLink className="text-blue-500 text-lg flex-shrink-0" />
               <div className="flex-1">
-                <span className="font-medium text-gray-700">
+                <span className="font-medium text-gray-700 dark:text-gray-200">
                   {copied ? 'Link copied!' : 'Copy shareable link'}
                 </span>
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-gray-400 dark:text-gray-500">
                   Anyone with the link can view this arrangement
                 </p>
               </div>
             </button>
 
-            <hr className="my-2 border-gray-100" />
+            <hr className="my-2 border-gray-100 dark:border-gray-700" />
 
             <button
               data-testid="export-btn"
               onClick={handleExport}
-              className="w-full flex items-center gap-2 text-sm px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-left"
+              className="w-full flex items-center gap-2 text-sm px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-left"
             >
               <HiDownload className="text-green-500 text-lg flex-shrink-0" />
               <div className="flex-1">
-                <span className="font-medium text-gray-700">Export as JSON</span>
-                <p className="text-xs text-gray-400">
+                <span className="font-medium text-gray-700 dark:text-gray-200">Export as JSON</span>
+                <p className="text-xs text-gray-400 dark:text-gray-500">
                   Download arrangement file
                 </p>
               </div>
@@ -136,28 +136,28 @@ export function SharePanel({ seating, zones, desks, deskNames, unavailableDesks,
             <button
               data-testid="export-pdf-btn"
               onClick={handleExportPdf}
-              className="w-full flex items-center gap-2 text-sm px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-left"
+              className="w-full flex items-center gap-2 text-sm px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-left"
             >
               <HiDocumentText className="text-red-500 text-lg flex-shrink-0" />
               <div className="flex-1">
-                <span className="font-medium text-gray-700">Export as PDF</span>
-                <p className="text-xs text-gray-400">
+                <span className="font-medium text-gray-700 dark:text-gray-200">Export as PDF</span>
+                <p className="text-xs text-gray-400 dark:text-gray-500">
                   Download printable floor plan
                 </p>
               </div>
             </button>
 
-            <hr className="my-2 border-gray-100" />
+            <hr className="my-2 border-gray-100 dark:border-gray-700" />
 
             <button
               data-testid="import-btn"
               onClick={handleImport}
-              className="w-full flex items-center gap-2 text-sm px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-left"
+              className="w-full flex items-center gap-2 text-sm px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-left"
             >
               <HiUpload className="text-purple-500 text-lg flex-shrink-0" />
               <div className="flex-1">
-                <span className="font-medium text-gray-700">Import from JSON</span>
-                <p className="text-xs text-gray-400">
+                <span className="font-medium text-gray-700 dark:text-gray-200">Import from JSON</span>
+                <p className="text-xs text-gray-400 dark:text-gray-500">
                   Load a shared arrangement file
                 </p>
               </div>
